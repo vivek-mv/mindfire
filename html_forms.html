@@ -1,0 +1,181 @@
+  <!DOCTYPE html>
+  <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Registration Form</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  
+        <style type="text/css">
+
+
+        </style>
+        
+    </head>
+    <body>
+
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-md-offset-3 col-lg-offset-3">
+              <form action="register.php" method="get" role="form">
+      
+                <h1>Register</h1>
+                
+                <fieldset>
+                  <legend>Your basic info</legend>
+                  <div class="well">
+                    <div class="row form-group">
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                         
+                          <label for="first_name">Frist Name:</label>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <input type="text"  name="first_name" class="form-control">
+                
+                      </div>
+                       <div class="row form-group">
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                         
+                          <label for="last_name">Last Name:</label>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <input type="text"  name="last_name" class="form-control">
+                
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                         
+                          <label for="middle_name">Middle Name</label>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <input type="text"  name="middle_name" class="form-control">
+                
+                      </div>
+
+
+                    </div>
+                    <div class="row form-group">
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                         
+                         
+                           <label for="mail">Email:</label>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <input type="email" name="user_email" class="form-control">
+                
+                      </div>
+
+                    </div>
+                    <div class="row form-group">
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                         
+                          <label for="password">Password:</label>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <input type="password" name="user_password" class="form-control">
+                
+                      </div>
+
+                    </div>
+                    <div class="row form-group">
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                         
+                           <label>Sex:</label>
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                          <label class="radio-inline">
+                            <input type="radio" value="Male" name="Sex" ><label for="Male" >Male</label>
+                          </label>
+                          <label class="radio-inline">
+                             <input type="radio" value="Female" name="Sex" ><label for="Female" >Female</label>
+                          </label>
+                          
+                        
+                      </div>
+
+                    </div>
+                  </div>  
+                 
+                  
+                </fieldset>
+                
+                <fieldset>
+                  <legend>Your profile</legend>
+                     <div class="well">
+                          <div class="row form-group">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                             
+                               <label for="bio">About you:</label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                              <textarea name="user_bio" class="form-control"></textarea>
+                          </div>
+
+                        </div>
+
+
+                   <div class="row form-group">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                             
+                               <label for="job">Job Role:</label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                             <select  name="user_job">
+                              <optgroup label="Web">
+                                <option value="frontend_developer">Front-End Developer</option>
+                                <option value="php_developor">PHP Developer</option>
+                                <option value="python_developer">Python Developer</option>
+                                <option value="rails_developer"> Rails Developer</option>
+                                <option value="web_designer">Web Designer</option>
+                                <option value="WordPress_developer">WordPress Developer</option>
+                              </optgroup>
+                              <optgroup label="Mobile">
+                                <option value="Android_developer">Androild Developer</option>
+                                <option value="iOS_developer">iOS Developer</option>
+                                <option value="mobile_designer">Mobile Designer</option>
+                              </optgroup>
+                              
+                              <optgroup label="Other">
+                                <option value="Testing">Testing</option>
+                                <option value="Hr">Hr</option>
+                              </optgroup>
+                            </select>
+                          </div>
+
+                        </div>
+                
+                     <div class="row form-group">
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                             
+                               <label>Interests:</label>
+                          </div>
+                          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+                               <div class="checkbox">
+                                  <input type="checkbox" value="interest_development" name="user_interest" id="user_interest"><label class="light" for="development">Development</label>
+                                </div>
+                                <div class="checkbox">
+                                  <input type="checkbox" value="interest_design" name="user_interest" ><label class="light" for="design">Design</label>
+                                </div>
+                                <div class="checkbox disabled">
+                                 <input type="checkbox" value="manager" name="user_interest"><label class="light" for="manager">Manager</label>
+                                </div>
+
+                            
+                          </div>
+
+                        </div>
+                
+                  
+                     </div>
+                  
+                
+                </fieldset>
+                <button type="submit">Register</button>
+              </form>
+          </div>
+        </div>
+
+
+      </div>
+      
+    </body>
+</html>
