@@ -11,11 +11,13 @@
 
 	// Check connection
 	if ($conn->connect_error) {
-	    die("Connection failed: " . $conn->connect_error);
+		header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
+	    exit();
 	} 
 	
 	
 	if(!empty($_POST)) {
+	
 		$prefix=$_POST["prefix"];
 
 		$firstName=$_POST["firstName"];
@@ -77,27 +79,27 @@
 				    
 				     $empID= $conn->insert_id;
 				} else {
-				    echo "Error: " . $sql . "<br>" . $conn->error;
-				    exit();
+				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
+	   			    exit();
 				}
 				
 
 		// insert residence address
 		$query2 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
 				VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax')";
-				if ($conn->query($query2) === TRUE) {
-				    
-				} else {
-				    echo "Error: " . $sql . "<br>" . $conn->error;
+				if ( ! $conn->query($query2)) {
+				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
+	    			exit();
 				}
 
 		// insert office address
 		$query3 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
 				VALUES ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
 				if ($conn->query($query3) === TRUE) {
-				    echo "New record created successfully";
+				    
 				} else {
-				    echo "Error: " . $sql . "<br>" . $conn->error;
+				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
+	    			exit();
 				}
 
 		// insert communication medium
@@ -112,9 +114,10 @@
 		$query3 = "INSERT INTO commMedium (`empId`,`msg`,`email`,`call`,`any`)
 				VALUES ('$empID','$msg','$comEmail','$call','$any')";
 				if ($conn->query($query3) === TRUE) {
-				    echo "New record created successfully";
+				    
 				} else {
-				    echo "Error: " . $sql . "<br>" . $conn->error;
+				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
+	    			exit();
 				    
 				}
 	}
@@ -130,32 +133,31 @@
 </head>
 <body>
 <nav class="navbar navbar-default">
-				<div class="container">
-				    <div class="navbar-header">
-				        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" 
-				        	aria-expanded="false" aria-controls="navbar">
-					        <span class="sr-only">Toggle navigation</span>
-					        <span class="icon-bar"></span>
-					        <span class="icon-bar"></span>
-					        <span class="icon-bar"></span>
-				      	</button>
-				     	<a class="navbar-brand" href="#">VIVEK</a>
-				    </div>
-				    <div id="navbar" class="navbar-collapse collapse">
-				      	<ul class="nav navbar-nav">
-					        <li><a href="http://localhost/project/mindfire/profile_app/registration_form.html">SIGN UP</a></li>
-					        <li><a href="#">LOG IN</a></li>
-					        <li><a href="http://localhost/project/mindfire/profile_app/register.php">DETAILS</a></li>
-				      	</ul>
-				    </div><!--/.nav-collapse -->
-				</div>
-			</nav>
+	<div class="container">
+	    <div class="navbar-header">
+	        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" 
+	        	aria-expanded="false" aria-controls="navbar">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+	      	</button>
+	     	<a class="navbar-brand" href="#">VIVEK</a>
+	    </div>
+	    <div id="navbar" class="navbar-collapse collapse">
+	      	<ul class="nav navbar-nav">
+		        <li><a href="http://localhost/project/mindfire/profile_app/registration_form.php">SIGN UP</a></li>
+		        <li><a href="#">LOG IN</a></li>
+		        <li><a href="http://localhost/project/mindfire/profile_app/register.php">DETAILS</a></li>
+	      	</ul>
+	    </div>
+	
+</nav>
 
-<div class="container">
-  <h2>Registered Employees</h2>
+  
   <div class="row">
-  	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-
+  	<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
+  		 <h2>Registered Employees</h2>
   		<?php 
 
   			$query4="SELECT employee.eid , employee.firstName , employee.middleName , employee.lastName ,employee.gender ,
@@ -167,8 +169,9 @@
 					FROM employee JOIN commMedium ON employee.eid = commMedium.empId
 					JOIN address ON  employee.eid = address.eid";
 				
-			$result = mysqli_query($conn, $query4) or die("failed".$conn->error);
-
+			$result = mysqli_query($conn, $query4) or 
+					  header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
+			
 			$employeeId=0;
 
   		?>
@@ -176,8 +179,7 @@
 	  <table class="table table-striped table-responsive">
 	    <thead>
 	      <tr>
-
-	        <th>Name</th>
+	      	<th>Name</th>
 	        <th>Gender</th>
 	        <th>D.O.B</th>
 	        <th>Phone</th>
@@ -187,8 +189,8 @@
 	        <th>Comm. Mode</th>
 	        <th title = "Address Residence">Address (R)</th>
 	        <th title = "Address Office">Address (O)</th>
-	        
-	        
+	        <th>Update</th>
+	        <th>Delete</th>
 	      </tr>
 	    </thead>
 	    <tbody>
@@ -207,25 +209,36 @@
 			        	echo "<td>Others</td>";
 			        }
 
-			        echo "<td>".$row["dob"]."</td>";
+			        echo "<td>".date_format(new DateTime($row["dob"]), 'd-m-Y')."</td>";
 
-			        echo "<td>M-".$row["mobile"]."<br>L-".$row["landline"]."</td>";
+			        echo "<td>".$row["mobile"]."(M)<br>".$row["landline"]."(L)</td>";
 
 			        echo "<td>".$row["email"]."</td>";
 
-			        echo "<td>".$row["maritalStatus"]."</td>";
+			        echo "<td>".ucfirst($row["maritalStatus"])."</td>";
 
-			        echo "<td>".$row["employment"]."in ".$row["employer"]."</td>";
-
+			        if($row["employment"]=='employed'){
+			        	echo "<td>".ucfirst($row["employment"])." in ".ucfirst($row["employer"])."</td>";			
+			        }else{
+			        	echo "<td>".ucfirst($row["employment"])."</td>";
+			        }
 			        echo "<td>";
 
-			        if($row["msg"]==1){echo "Message";}
+			        if($row["msg"]==1) {
+			        	echo "Message";
+			        }
 
-			        if($row["comm_email"]==1){echo "<br>Email";}
+			        if($row["comm_email"]==1) {
+			        	echo "<br>Email";
+			        }
 
-			        if($row["call"]==1){echo "<br>Phone";}
+			        if($row["call"]==1) {
+			        	echo "<br>Phone";
+			        }
 
-			        if($row["any"]==1){echo "<br>Any";}
+			        if($row["any"]==1) {
+			        	echo "<br>Any";
+			        }
 
 			        echo "</td>";
 		    	}

@@ -1,3 +1,10 @@
+<?php
+if( !empty( $_REQUEST['Message'] ) )
+{
+    echo "Sorry , something bad happened .Please try after some time.".$_REQUEST['Message'];
+}
+?>
+
 <!DOCTYPE html>
 	<html>
 		<head>
@@ -21,7 +28,7 @@
 				    </div>
 				    <div id="navbar" class="navbar-collapse collapse">
 				      	<ul class="nav navbar-nav">
-					        <li><a href="http://localhost/project/mindfire/profile_app/registration_form.html">SIGN UP</a></li>
+					        <li><a href="http://localhost/project/mindfire/profile_app/registration_form.php">SIGN UP</a></li>
 					        <li><a href="#">LOG IN</a></li>
 					        <li><a href="http://localhost/project/mindfire/profile_app/register.php">DETAILS</a></li>
 				      	</ul>
@@ -30,7 +37,7 @@
 			</nav>
 
 			<div class="container">
-				<h1>Register</h1>
+				<h1>REGISTER</h1>
 				<form action="register.php" method="post" role="form" class="form-horizontal">
 					<div class="row">
 						
