@@ -1,6 +1,6 @@
 <?php 
+	//Enable error handling first
 	// DATABASE CONNECTION
-
 	$servername = "localhost";
 	$username = "root";
 	$password = "mindfire";
@@ -14,7 +14,12 @@
 		header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
 	    exit();
 	} 
-	
+
+	//Display error message if delete fails
+	if( isset($_GET["Message"]) ) {
+		echo "Sorry delete failed !, please try after some time ";
+	}
+
 	if ( $_GET["userAction"]=="delete" ) {
 		//Write a query to delete a row from the registration database with the respective employee id
 		$deleteAddress="DELETE FROM address WHERE eid=".$_GET["userId"].";";
@@ -32,6 +37,7 @@
 		mysqli_query($conn, $deleteEmployee) or 
 					  header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
 	}
+
 	if ( !empty($_POST) ) {
 	
 		$prefix=$_POST["prefix"];
@@ -142,6 +148,7 @@
 				}
 	}
 ?>
+<!-- make this page responsive -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -174,9 +181,8 @@
 		
 	</nav>
 
-  
   <div class="row">
-  	<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
+    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
   		 <h2>Registered Employees</h2>
   		<?php 
 
@@ -188,8 +194,8 @@
 					address.state , address.zip , address.fax 
 					FROM employee JOIN commMedium ON employee.eid = commMedium.empId
 					JOIN address ON  employee.eid = address.eid";
-			
-			//Display some message when no data is present in the table	
+
+			//Display some some message when no data is present in the table
 			$result = mysqli_query($conn, $query4) or 
 					  header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
 			
@@ -240,7 +246,7 @@
 
 			        if ($row["employment"]=='employed') {
 			        	echo "<td>".ucfirst($row["employment"])." in ".ucfirst($row["employer"])."</td>";			
-			        }else{
+			        }else {
 			        	echo "<td>".ucfirst($row["employment"])."</td>";
 			        }
 			        echo "<td>";
@@ -270,9 +276,9 @@
 		        if ($row["type"]==2) {
 		    		echo "<td>".$row["street"]."<br>".$row["city"].",".$row["zip"]."<br>".$row["state"]."</td>";
 
-		    		echo "<td><a href='register.php?userId=".$row["eid"]."&userAction=update' target='_self' > update</a></td>";
+		    		echo "<td><a href='registration_form.php?userId=".$row["eid"]."&userAction=update' target='_self' > UPDATE</a></td>";
 
-		    		echo "<td><a href='register.php?userId=".$row["eid"]."&userAction=delete' target='_self' > delete</a></td>";
+		    		echo "<td><a href='register.php?userId=".$row["eid"]."&userAction=delete' target='_self' > DELETE</a></td>";
 
 		    	}
 		        if ($employeeId == $row["eid"]) {
@@ -288,7 +294,7 @@
   	</div>
   </div>
   
-	</div>
+ </div>
 
 </body>
 </html>
