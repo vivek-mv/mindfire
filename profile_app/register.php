@@ -38,60 +38,62 @@
 					  header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
 	}
 
-	if ( !empty($_POST) ) {
+	if ( $_SERVER["REQUEST_METHOD"] == "POST" ) {
+
+		function test_input($data) {
+			$data = trim($data);
+			$data = stripslashes($data);
+			$data = htmlspecialchars($data);
+			return $data;
+		}
 	
-		$prefix=$_POST["prefix"];
+		$prefix=test_input($_POST["prefix"]);
 
-		$firstName=$_POST["firstName"];
+		$firstName=test_input($_POST["firstName"]);
 
-		$middleName=$_POST["middleName"];
+		$middleName=test_input($_POST["middleName"]);
 
-		$lastName=$_POST["lastName"];
+		$lastName=test_input($_POST["lastName"]);
 
-		$gender=$_POST["gender"];
+		$gender=test_input($_POST["gender"]);
 
-		$dob=$_POST["dob"];
+		$dob=test_input($_POST["dob"]);
 
-		$mobile=$_POST["mobile"];
+		$mobile=test_input($_POST["mobile"]);
 
-		$landline=$_POST["landline"];
+		$landline=test_input($_POST["landline"]);
 
-		$email=$_POST["email"];
+		$email=test_input($_POST["email"]);
 
-		$maritalStatus=$_POST["maritalStatus"];
+		$maritalStatus=test_input($_POST["maritalStatus"]);
 
-		$employment=$_POST["employment"];
+		$employment=test_input($_POST["employment"]);
 
-		$employer=$_POST["employer"];
+		$employer=test_input($_POST["employer"]);
 
 		$photo="sample path for photo"; // Change it later
 
-		$residenceStreet=$_POST["residenceStreet"];
+		$residenceStreet=test_input($_POST["residenceStreet"]);
 
+		$resedenceCity=test_input($_POST["resedenceCity"]);
 
-		$resedenceCity=$_POST["resedenceCity"];
+		$resedenceState=test_input($_POST["residenceState"]);
 
-	// Create connection
-	$conn = new mysqli( $servername, $username, $password, $database);
+		$residenceZip=test_input($_POST["residenceZip"]);
 
+		$residenceFax=test_input($_POST["residenceFax"]);
 
-		$resedenceState=$_POST["residenceState"];
+		$officeStreet=test_input($_POST["officeStreet"]);
 
-		$residenceZip=$_POST["residenceZip"];
+		$officeCity=test_input($_POST["officeCity"]);
 
-		$residenceFax=$_POST["residenceFax"];
+		$officeState=test_input($_POST["officeState"]);
 
-		$officeStreet=$_POST["officeStreet"];
+		$officeZip=test_input($_POST["officeZip"]);
 
-		$officeCity=$_POST["officeCity"];
+		$officeFax=test_input($_POST["officeFax"]);
 
-		$officeState=$_POST["officeState"];
-
-		$officeZip=$_POST["officeZip"];
-
-		$officeFax=$_POST["officeFax"];
-
-		$note=$_POST["note"];
+		$note=test_input($_POST["note"]);
 
 		$commMedium=$_POST["commMed"]; // its array
 
@@ -114,22 +116,13 @@
 		//Change here , make a single query for both residencial and office address		
 		// insert residence address
 		$query2 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
-				VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax')";
+				VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax') ,
+				('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
 				if ( ! $conn->query($query2)) {
 				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
 	    			exit();
 				}
 
-		// insert office address
-		$query3 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
-				VALUES ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
-				//Change here, make it a single if 
-				if ($conn->query($query3) === TRUE) {
-				    
-				} else {
-				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);
-	    			exit();
-				}
 
 		// insert communication medium
 		$msg=in_array("msg", $commMedium) ? 1 : 0;
@@ -143,14 +136,11 @@
 		$query4 = "INSERT INTO commMedium (`empId`,`msg`,`email`,`call`,`any`)
 				VALUES ('$empID','$msg','$comEmail','$call','$any')";
 				//Change here,make it a sigle if
-				if ($conn->query($query4) === TRUE) {
-				    
-				} else {
-				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="
+				if ( !$conn->query($query4) ) {
+				   header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="
 				    	  ." ".$conn->connect_error);
-	    			exit();
-				    
-				}
+	    			exit();  
+				} 
 	}
 ?>
 <!-- make this page responsive -->
@@ -282,9 +272,11 @@
 		        if ($row["type"]==2) {
 		    		echo "<td>".$row["street"]."<br>".$row["city"].",".$row["zip"]."<br>".$row["state"]."</td>";
 
-		    		echo "<td><a href='registration_form.php?userId=".$row["eid"]."&userAction=update' target='_self' > UPDATE</a></td>";
+		    		echo "<td><a href='registration_form.php?userId=".$row["eid"]."&userAction=update' target='_self' >
+		    		 <span class='glyphicon glyphicon-pencil' aria-hidden='true'></span></a></td>";
 
-		    		echo "<td><a href='register.php?userId=".$row["eid"]."&userAction=delete' target='_self' > DELETE</a></td>";
+		    		echo "<td><a href='register.php?userId=".$row["eid"]."&userAction=delete' target='_self' > 
+		    		<span class='glyphicon glyphicon-remove' aria-hidden='true'></span></a></td>";
 
 		    	}
 		        if ($employeeId == $row["eid"]) {
@@ -304,42 +296,6 @@
 
 </body>
 </html>
-=======
 
-	// insert residence address
-	$query2 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
-			VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax')";
-			if ($conn->query($query2) === TRUE) {
-			    echo "New record created successfully";
-			} else {
-			    echo "Error: " . $sql . "<br>" . $conn->error;
-			}
 
-	// insert office address
-	$query3 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
-			VALUES ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
-			if ($conn->query($query3) === TRUE) {
-			    echo "New record created successfully";
-			} else {
-			    echo "Error: " . $sql . "<br>" . $conn->error;
-			}
-
-	// insert communication medium
-	$msg=in_array("msg", $commMedium) ? 1 : 0;
-
-	$comEmail=in_array("mail", $commMedium) ? 1 : 0;
-
-	$call=in_array("phone", $commMedium) ? 1 : 0;
-
-	$any=in_array("any", $commMedium) ? 1 : 0;
-
-	$query3 = "INSERT INTO commMedium (`empId`,`msg`,`email`,`call`,`any`)
-			VALUES ('$empID','$msg','$comEmail','$call','$any')";
-			if ($conn->query($query3) === TRUE) {
-			    echo "New record created successfully";
-			} else {
-			    echo "Error: " . $sql . "<br>" . $conn->error;
-			}
-
-?>
 

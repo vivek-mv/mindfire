@@ -116,7 +116,7 @@
 						              <div class="col-md-7">
 						              <input  name="firstName" type="text" placeholder="First Name" class="form-control input-md" 
 
-						              <?php if( isset($empDetails["firstName"]) ) echo 'value="'.$empDetails["firstName"].'"'; ?> >
+						              <?php if( isset($empDetails["firstName"]) ) echo 'value="'.$empDetails["firstName"].'"'; ?> required>
 						              </div>
 						            </div>
 
