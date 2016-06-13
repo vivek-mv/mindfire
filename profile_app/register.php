@@ -68,7 +68,12 @@
 
 		$residenceStreet=$_POST["residenceStreet"];
 
+
 		$resedenceCity=$_POST["resedenceCity"];
+
+	// Create connection
+	$conn = new mysqli( $servername, $username, $password, $database);
+
 
 		$resedenceState=$_POST["residenceState"];
 
@@ -199,6 +204,7 @@
 			$result = mysqli_query($conn, $query4) or 
 					  header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
 			
+
 			$employeeId=0;
 
   		?>
@@ -298,3 +304,42 @@
 
 </body>
 </html>
+=======
+
+	// insert residence address
+	$query2 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
+			VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax')";
+			if ($conn->query($query2) === TRUE) {
+			    echo "New record created successfully";
+			} else {
+			    echo "Error: " . $sql . "<br>" . $conn->error;
+			}
+
+	// insert office address
+	$query3 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
+			VALUES ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
+			if ($conn->query($query3) === TRUE) {
+			    echo "New record created successfully";
+			} else {
+			    echo "Error: " . $sql . "<br>" . $conn->error;
+			}
+
+	// insert communication medium
+	$msg=in_array("msg", $commMedium) ? 1 : 0;
+
+	$comEmail=in_array("mail", $commMedium) ? 1 : 0;
+
+	$call=in_array("phone", $commMedium) ? 1 : 0;
+
+	$any=in_array("any", $commMedium) ? 1 : 0;
+
+	$query3 = "INSERT INTO commMedium (`empId`,`msg`,`email`,`call`,`any`)
+			VALUES ('$empID','$msg','$comEmail','$call','$any')";
+			if ($conn->query($query3) === TRUE) {
+			    echo "New record created successfully";
+			} else {
+			    echo "Error: " . $sql . "<br>" . $conn->error;
+			}
+
+?>
+
