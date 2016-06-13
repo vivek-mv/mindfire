@@ -13,53 +13,60 @@
 		header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message=.".$conn->connect_error);
 	    exit();
 	}
-	$prefix=$_POST["prefix"];
+	function test_input($data) {
+		$data = trim($data);
+		$data = stripslashes($data);
+		$data = htmlspecialchars($data);
+		return $data;
+	}
+	
+	$prefix=test_input($_POST["prefix"]);
 
-	$firstName=$_POST["firstName"];
+	$firstName=test_input($_POST["firstName"]);
+	
+	$middleName=test_input($_POST["middleName"]);
 
-	$middleName=$_POST["middleName"];
+	$lastName=test_input($_POST["lastName"]);
 
-	$lastName=$_POST["lastName"];
+	$gender=test_input($_POST["gender"]);
 
-	$gender=$_POST["gender"];
+	$dob=test_input($_POST["dob"]);
 
-	$dob=$_POST["dob"];
+	$mobile=test_input($_POST["mobile"]);
 
-	$mobile=$_POST["mobile"];
+	$landline=test_input($_POST["landline"]);
 
-	$landline=$_POST["landline"];
+	$email=test_input($_POST["email"]);
 
-	$email=$_POST["email"];
+	$maritalStatus=test_input($_POST["maritalStatus"]);
 
-	$maritalStatus=$_POST["maritalStatus"];
+	$employment=test_input($_POST["employment"]);
 
-	$employment=$_POST["employment"];
-
-	$employer=$_POST["employer"];
+	$employer=test_input($_POST["employer"]);
 
 	$photo="sample path for photo"; // Change it later
 
-	$residenceStreet=$_POST["residenceStreet"];
+	$residenceStreet=test_input($_POST["residenceStreet"]);
 
-	$residenceCity=$_POST["resedenceCity"];
+	$residenceCity=test_input($_POST["resedenceCity"]);
 
-	$residenceState=$_POST["residenceState"];
+	$residenceState=test_input($_POST["residenceState"]);
 
-	$residenceZip=$_POST["residenceZip"];
+	$residenceZip=test_input($_POST["residenceZip"]);
 
-	$residenceFax=$_POST["residenceFax"];
+	$residenceFax=test_input($_POST["residenceFax"]);
 
-	$officeStreet=$_POST["officeStreet"];
+	$officeStreet=test_input($_POST["officeStreet"]);
 
-	$officeCity=$_POST["officeCity"];
+	$officeCity=test_input($_POST["officeCity"]);
 
-	$officeState=$_POST["officeState"];
+	$officeState=test_input($_POST["officeState"]);
 
-	$officeZip=$_POST["officeZip"];
+	$officeZip=test_input($_POST["officeZip"]);
 
-	$officeFax=$_POST["officeFax"];
+	$officeFax=test_input($_POST["officeFax"]);
 
-	$note=$_POST["note"];
+	$note=test_input($_POST["note"]);
 
 	$commMedium=$_POST["commMed"];
 

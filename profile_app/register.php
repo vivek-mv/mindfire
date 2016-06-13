@@ -51,9 +51,27 @@
 
 		$firstName=test_input($_POST["firstName"]);
 
+		if ( !preg_match("/^[a-zA-Z ]*$/",$firstName) ) {
+			$nameErr = "Only letters and white space allowed is allowed in the first name field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
+
 		$middleName=test_input($_POST["middleName"]);
 
+		if ( !preg_match("/^[a-zA-Z ]*$/",$middleName) ) {
+			$nameErr = "Only letters and white space allowed is allowed in the middle name field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
+
 		$lastName=test_input($_POST["lastName"]);
+
+		if ( !preg_match("/^[a-zA-Z ]*$/",$lastName) ) {
+			$nameErr = "Only letters and white space allowed is allowed in the last name field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
 
 		$gender=test_input($_POST["gender"]);
 
@@ -61,9 +79,27 @@
 
 		$mobile=test_input($_POST["mobile"]);
 
+		if ( !preg_match("/^[0-9]*$/",$mobile) ) {
+			$nameErr = "Only numbers are allowed in the mobile field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
+
 		$landline=test_input($_POST["landline"]);
 
+		if ( !preg_match("/^[0-9]*$/",$landline) ) {
+			$nameErr = "Only numbers are allowed in the landline field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
+
 		$email=test_input($_POST["email"]);
+
+		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+			$emailErr = "Invalid email format"; 
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$emailErr);
+			exit();
+		}
 
 		$maritalStatus=test_input($_POST["maritalStatus"]);
 
@@ -71,15 +107,33 @@
 
 		$employer=test_input($_POST["employer"]);
 
+		if ( !preg_match("/^[a-zA-Z ]*$/",$employer) ) {
+			$nameErr = "Only letters and white space allowed is allowed in the employer field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
+
 		$photo="sample path for photo"; // Change it later
 
 		$residenceStreet=test_input($_POST["residenceStreet"]);
 
 		$resedenceCity=test_input($_POST["resedenceCity"]);
 
+		if ( !preg_match("/^[a-zA-Z ]*$/",$resedenceCity) ) {
+			$nameErr = "Only letters and white space allowed is allowed in the residence city field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
+
 		$resedenceState=test_input($_POST["residenceState"]);
 
 		$residenceZip=test_input($_POST["residenceZip"]);
+
+		if ( !preg_match("/^[0-9]*$/",$residenceZip) ) {
+			$nameErr = "Only numbers are allowed in the residence zip field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
 
 		$residenceFax=test_input($_POST["residenceFax"]);
 
@@ -87,9 +141,21 @@
 
 		$officeCity=test_input($_POST["officeCity"]);
 
+		if ( !preg_match("/^[a-zA-Z ]*$/",$officeCity) ) {
+			$nameErr = "Only letters and white space allowed is allowed in the office city field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
+
 		$officeState=test_input($_POST["officeState"]);
 
 		$officeZip=test_input($_POST["officeZip"]);
+
+		if ( !preg_match("/^[0-9]*$/",$officeZip) ) {
+			$nameErr = "Only numbers are allowed in the office zip field";
+			header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=".$nameErr);
+			exit();
+		}
 
 		$officeFax=test_input($_POST["officeFax"]);
 
@@ -103,10 +169,9 @@
 						`employer`,`photo`,`note`)
 				VALUES ('$prefix','$firstName','$middleName','$lastName','$gender','$dob','$mobile','$landline','$email','$maritalStatus','$employment',
 						'$employer','$photo','$note')";
-				//Change here, make it a single if statement
+				
 				if ($conn->query($query1) === TRUE) {
 					
-				    
 				     $empID= $conn->insert_id;
 				} else {
 				    header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="." ".$conn->connect_error);

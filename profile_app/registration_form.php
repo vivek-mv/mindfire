@@ -3,6 +3,10 @@
 
 	    echo "Sorry , something bad happened .Please try after some time.".$_REQUEST['Message'];
 	}
+	if( !empty($_GET['valError']) ) {
+
+	    echo $_GET['valError'];
+	}
 	if( isset($_GET["userId"]) && isset($_GET["userAction"]) ) {
 
 		// DATABASE CONNECTION
