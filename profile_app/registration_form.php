@@ -208,7 +208,7 @@
                                 <label class="col-md-3 control-label">Upload Photo</label>
                                 <div class="col-md-7">
                                     <input  name="image" class="input-file" type="file">
-                                    <?php if( isset($empDetails["photo"]) ) 
+                                    <?php if( isset($empDetails["photo"]) && !empty($empDetails["photo"]) ) 
                                             echo '<img src="http://localhost/project/mindfire/profile_app/profile_pic/'.$empDetails["photo"].'"  alt="profile pic" />'; ?>
                                     
                                 </div>

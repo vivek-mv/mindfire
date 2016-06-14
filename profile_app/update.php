@@ -75,7 +75,7 @@
         exit();
     }
     
-    if( isset($_FILES['image']) ) {
+    if( isset($_FILES['image']) && !empty($_FILES['image']['name']) && $_FILES['image']['size'] != 0) {
       $file_name = $_FILES['image']['name'];
       $file_size =$_FILES['image']['size'];
       $file_tmp =$_FILES['image']['tmp_name'];
@@ -95,7 +95,7 @@
       }
       
       move_uploaded_file($file_tmp,"/var/www/html/project/mindfire/profile_app/profile_pic/".$file_name);
-      
+
       $deleteImage ="SELECT employee.photo FROM employee WHERE eid=" . $_GET["userId"] . ";";
 
       $result = mysqli_query($conn, $deleteImage) or 
