@@ -1,18 +1,6 @@
 <?php
-    // DATABASE CONNECTION
-    $servername = "localhost";
-    $username   = "root";
-    $password   = "mindfire";
-    $database   = "registration";
+    require_once('db_conn.php');
     
-    // Create connection
-    $conn = new mysqli($servername, $username, $password, $database);
-    
-    // Check connection
-    if ($conn->connect_error) {
-        header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message=." . $conn->connect_error);
-        exit();
-    }
     function test_input($data)
     {
         $data = trim($data);
@@ -87,7 +75,39 @@
         exit();
     }
     
-    $photo = "sample path for photo"; // Change it later
+    if( isset($_FILES['image']) ) {
+      $file_name = $_FILES['image']['name'];
+      $file_size =$_FILES['image']['size'];
+      $file_tmp =$_FILES['image']['tmp_name'];
+      $file_type=$_FILES['image']['type'];
+      $file_ext=strtolower(end(explode('.',$_FILES['image']['name'])));
+      
+      $expensions= array("jpeg","jpg","png");
+      
+      if(in_array($file_ext,$expensions)=== false){
+         $error="extension not allowed, please choose a JPEG or PNG file.";
+         header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $error);exit();
+      }
+      
+      if($file_size > 2097152){
+         $error='File size must be excately 2 MB';
+         header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $error);exit();
+      }
+      
+      move_uploaded_file($file_tmp,"/var/www/html/project/mindfire/profile_app/profile_pic/".$file_name);
+      
+      $deleteImage ="SELECT employee.photo FROM employee WHERE eid=" . $_GET["userId"] . ";";
+
+      $result = mysqli_query($conn, $deleteImage) or 
+                header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
+
+      $row = $result->fetch_assoc();
+
+      if ( !unlink("/var/www/html/project/mindfire/profile_app/profile_pic/".$row["photo"]) ) {
+          header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= Unable to delete image");
+      }
+    }
+    $photo = $file_name;
     
     $residenceStreet = test_input($_POST["residenceStreet"]);
     
@@ -161,7 +181,12 @@
     $conn->query($updateCommMedium) or header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message=" . " " . $conn->connect_error);
     
     
-    $updateEmpDetails = "UPDATE employee SET prefix = '" . $prefix . "' , firstName = '" . $firstName . "' , middleName = '" . $middleName . "' , lastName = '" . $lastName . "' ,  gender = '" . $gender . "' , dob = '" . $dob . "' , mobile = '" . $mobile . "' , landline='" . $landline . "', email ='" . $email . "', maritalStatus= '" . $maritalStatus . "' , employment = '" . $employment . "' , employer='" . $employer . "' , photo = '" . $photo . "' , note= '" . $note . "' where eid = " . $_GET["userId"];
+    $updateEmpDetails = "UPDATE employee SET prefix = '" . $prefix . "' , firstName = '" . $firstName . "' , 
+                        middleName = '" . $middleName . "' , lastName = '" . $lastName . "' ,  gender = '" 
+                        . $gender . "' , dob = '" . $dob . "' , mobile = '" . $mobile . "' , landline='" 
+                        . $landline . "', email ='" . $email . "', maritalStatus= '" . $maritalStatus . "' , 
+                        employment = '" . $employment . "' , employer='" . $employer . "' , photo = '" . $photo . "' ,
+                         note= '" . $note . "' where eid = " . $_GET["userId"];
     
     $conn->query($updateEmpDetails) or header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message=" . " " . $conn->connect_error);
     

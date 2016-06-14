@@ -1,4 +1,6 @@
 <?php
+    require_once('db_conn.php');
+    
     if (!empty($_REQUEST['Message'])) {
         
         echo "Sorry , something bad happened .Please try after some time." . $_REQUEST['Message'];
@@ -9,25 +11,10 @@
     }
     if (isset($_GET["userId"]) && isset($_GET["userAction"])) {
         
-        // DATABASE CONNECTION
-        $servername = "localhost";
-        $username   = "root";
-        $password   = "mindfire";
-        $database   = "registration";
-        
-        // Create connection
-        $conn = new mysqli($servername, $username, $password, $database);
-        
-        // Check connection
-        if ($conn->connect_error) {
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message=" . " " . $conn->connect_error);
-            exit();
-        }
-        
         $selectEmpDetails = "SELECT employee.eid , employee.prefix , employee.firstName , employee.middleName , 
                             employee.lastName ,employee.gender ,
                             employee.dob , employee.mobile , employee.landline , employee.email , employee.maritalStatus , 
-                            employee.employment , employee.employer , employee.note , commMedium.empId ,commMedium.msg , commMedium.email 
+                            employee.employment , employee.employer , employee.note , employee.photo , commMedium.empId ,commMedium.msg , commMedium.email 
                             AS comm_email, commMedium.call , commMedium.any 
                             FROM employee JOIN commMedium ON employee.eid = commMedium.empId
                             WHERE eid =" . $_GET["userId"];
@@ -85,7 +72,9 @@
         </nav>
         <div class="container">
         <h1>REGISTER</h1>
-        <form action=<?php if( isset($_GET['userAction']) && $_GET['userAction']=='update' ) {echo 'update.php?userId='.$_GET["userId"]; } else {echo 'register.php';} ?> method="post" role="form" class="form-horizontal">
+        <form action=<?php if( isset($_GET['userAction']) && $_GET['userAction']=='update' ) 
+        {echo 'update.php?userId='.$_GET["userId"]; } else {echo 'register.php';} ?> method="post" 
+        role="form" class="form-horizontal" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <fieldset>
@@ -218,7 +207,10 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Upload Photo</label>
                                 <div class="col-md-7">
-                                    <input  name="photo" class="input-file" type="file">
+                                    <input  name="image" class="input-file" type="file">
+                                    <?php if( isset($empDetails["photo"]) ) 
+                                            echo '<img src="http://localhost/project/mindfire/profile_app/profile_pic/'.$empDetails["photo"].'"  alt="profile pic" />'; ?>
+                                    
                                 </div>
                             </div>
                         </div>

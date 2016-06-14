@@ -1,18 +1,5 @@
 <?php
-    // DATABASE CONNECTION
-    $servername = "localhost";
-    $username   = "root";
-    $password   = "mindfire";
-    $database   = "registration";
-    
-    // Create connection
-    $conn = new mysqli($servername, $username, $password, $database);
-    
-    // Check connection
-    if ($conn->connect_error) {
-        header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message=" . " " . $conn->connect_error);
-        exit();
-    }
+    require_once('db_conn.php');
     
     //Display error message if delete fails
     if (isset($_GET["Message"])) {
@@ -26,6 +13,17 @@
         $deleteCommMode = "DELETE FROM commMedium WHERE empId=" . $_GET["userId"] . ";";
         
         $deleteEmployee = "DELETE FROM employee WHERE eid=" . $_GET["userId"] . ";";
+
+        $deleteImage ="SELECT employee.photo FROM employee WHERE eid=" . $_GET["userId"] . ";";
+
+        $result = mysqli_query($conn, $deleteImage) or 
+                    header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
+
+        $row = $result->fetch_assoc();
+
+        if ( !unlink("/var/www/html/project/mindfire/profile_app/profile_pic/".$row["photo"]) ) {
+          header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= Unable to delete image");
+        }
         
         mysqli_query($conn, $deleteAddress) or 
         header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
@@ -113,8 +111,30 @@
             header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
             exit();
         }
+
+        if(isset($_FILES['image'])){
+          $file_name = $_FILES['image']['name'];
+          $file_size =$_FILES['image']['size'];
+          $file_tmp =$_FILES['image']['tmp_name'];
+          $file_type=$_FILES['image']['type'];
+          $file_ext=strtolower(end(explode('.',$_FILES['image']['name'])));
+          
+          $expensions= array("jpeg","jpg","png");
+          
+          if(in_array($file_ext,$expensions)=== false){
+             $error="extension not allowed, please choose a JPEG or PNG file.";
+             header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $error);exit();
+          }
+          
+          if($file_size > 2097152){
+             $error='File size must be excately 2 MB';
+             header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $error);exit();
+          }
+          
+          move_uploaded_file($file_tmp,"/var/www/html/project/mindfire/profile_app/profile_pic/".$file_name);
+       }
         
-        $photo = "sample path for photo"; // Change it later
+        $photo = $file_name;
         
         $residenceStreet = test_input($_POST["residenceStreet"]);
         
@@ -178,7 +198,7 @@
              . " " . $conn->connect_error);
             exit();
         }
-        // insert residence address
+        // insert residence and office address
         $query2 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
                 VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax') ,
                 ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
@@ -249,25 +269,20 @@
         <div class="row">
             <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
                 <h2>Registered Employees</h2>
-          		<?php 
-
-          			$query4="SELECT employee.eid , employee.firstName , employee.middleName , employee.lastName ,employee.gender ,
-        					employee.dob , employee.mobile , employee.landline , employee.email , employee.maritalStatus , 
-        					employee.employment , employee.employer , commMedium.empId ,commMedium.msg , commMedium.email 
-        					as comm_email, 
-        					commMedium.call , commMedium.any ,address.eid , address.type , address.street , address.city ,
-        					address.state , address.zip , address.fax 
-        					FROM employee JOIN commMedium ON employee.eid = commMedium.empId
-        					JOIN address ON  employee.eid = address.eid";
-
-        			//Display some some message when no data is present in the table
-        			$result = mysqli_query($conn, $query4) or 
-        					  header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
-        			
-
-        			$employeeId=0;
-
-          		?>
+          		<?php
+                $query4 = "SELECT employee.eid , employee.firstName , employee.middleName , employee.lastName ,employee.gender ,
+                            employee.dob , employee.mobile , employee.landline , employee.email , employee.maritalStatus , 
+                            employee.employment , employee.employer , commMedium.empId ,commMedium.msg , commMedium.email 
+                            AS comm_email, 
+                            commMedium.call , commMedium.any ,address.eid , address.type , address.street , address.city ,
+                            address.state , address.zip , address.fax 
+                            FROM employee JOIN commMedium ON employee.eid = commMedium.empId
+                            JOIN address ON  employee.eid = address.eid";
+                //Display some some message when no data is present in the table
+                $result = mysqli_query($conn, $query4) or 
+                           header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
+                $employeeId = 0;
+                ?>
 
                 <table class="table table-striped table-responsive">
                     <thead>
