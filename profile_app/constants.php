@@ -1,3 +1,4 @@
 <?php
-	define("ROOT_PATH", "http://172.16.9.16/project/mindfire/");
+	define("ROOT_IMAGE_PATH", "/var/www/html/project/mindfire/");
+	
 ?>
