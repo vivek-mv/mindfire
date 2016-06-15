@@ -1,5 +1,6 @@
 <?php
-// DATABASE CONNECTION
+    
+    // DATABASE CONNECTION
     $servername = "localhost";
     $username   = "root";
     $password   = "mindfire";
@@ -10,7 +11,7 @@
     
     // Check connection
     if ($conn->connect_error) {
-        header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message=" . " " . $conn->connect_error);
+        header("Location:registration_form.php?Message=" . " " . $conn->connect_error);
         exit();
     }
 ?>

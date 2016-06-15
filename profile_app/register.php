@@ -1,45 +1,36 @@
 <?php
     require_once('db_conn.php');
+    require_once('constants.php');
     
     //Display error message if delete fails
-    if (isset($_GET["Message"])) {
+    if ( isset($_GET["Message"]) && !empty($_GET["Message"]) ) {
         echo "Sorry delete failed !, please try after some time ";
     }
     
     if (isset($_GET["userAction"]) && $_GET["userAction"] == "delete") {
-        //Write a query to delete a row from the registration database with the respective employee id
+        //Query to delete a row from the registration database with the respective employee id
         $deleteAddress = "DELETE FROM address WHERE eid=" . $_GET["userId"] . ";";
-        
         $deleteCommMode = "DELETE FROM commMedium WHERE empId=" . $_GET["userId"] . ";";
-        
         $deleteEmployee = "DELETE FROM employee WHERE eid=" . $_GET["userId"] . ";";
-
-        $deleteImage ="SELECT employee.photo FROM employee WHERE eid=" . $_GET["userId"] . ";";
-
-        $result = mysqli_query($conn, $deleteImage) or 
-                    header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
-
+        $image ="SELECT employee.photo FROM employee WHERE eid=" . $_GET["userId"] . ";";
+        $result = mysqli_query($conn, $image) or 
+                    header("Location:register.php?Message= delete failed:(");
         $row = $result->fetch_assoc();
-
-        if ( !unlink("/var/www/html/project/mindfire/profile_app/profile_pic/".$row["photo"]) ) {
-          header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= Unable to delete image");
+        if ( !empty($row["photo"])  && !unlink("/var/www/html/project/mindfire/profile_app/profile_pic/".$row["photo"]) ) {
+            header("Location:register.php?Message= Unable to delete image");
         }
-        
         mysqli_query($conn, $deleteAddress) or 
-        header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
-        
+            header("Location:register.php?Message= delete failed:(");
         mysqli_query($conn, $deleteCommMode) or 
-        header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
-        
+            header("Location:register.php?Message= delete failed:(");
         mysqli_query($conn, $deleteEmployee) or 
-        header("Location:http://localhost/project/mindfire/profile_app/register.php?Message= delete failed:(");
+            header("Location:register.php?Message= delete failed:(");
+        header("Location:register.php");
+        exit();
     }
     
-    
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        
-        function test_input($data)
-        {
+        function test_input($data) {
             $data = trim($data);
             $data = stripslashes($data);
             $data = htmlspecialchars($data);
@@ -47,20 +38,19 @@
         }
         
         $prefix = test_input($_POST["prefix"]);
-        
         $firstName = test_input($_POST["firstName"]);
         
         if (!preg_match("/^[a-zA-Z ]*$/", $firstName)) {
             $nameErr = "Only letters and white space allowed is allowed in the first name field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
         $middleName = test_input($_POST["middleName"]);
         
         if (!preg_match("/^[a-zA-Z ]*$/", $middleName)) {
-            $nameErr = "Only letters and white space allowed is allowed in the middle name field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            $middleNameErr = "Only letters and white space allowed is allowed in the middle name field";
+            header("Location:registration_form.php?valError=" . $MiddleNameErr);
             exit();
         }
         
@@ -68,19 +58,17 @@
         
         if (!preg_match("/^[a-zA-Z ]*$/", $lastName)) {
             $nameErr = "Only letters and white space allowed is allowed in the last name field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
         $gender = test_input($_POST["gender"]);
-        
         $dob = test_input($_POST["dob"]);
-        
         $mobile = test_input($_POST["mobile"]);
         
         if (!preg_match("/^[0-9]*$/", $mobile)) {
             $nameErr = "Only numbers are allowed in the mobile field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
@@ -88,7 +76,7 @@
         
         if (!preg_match("/^[0-9]*$/", $landline)) {
             $nameErr = "Only numbers are allowed in the landline field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
@@ -96,19 +84,17 @@
         
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $emailErr = "Invalid email format";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $emailErr);
+            header("Location:registration_form.php?valError=" . $emailErr);
             exit();
         }
         
         $maritalStatus = test_input($_POST["maritalStatus"]);
-        
         $employment = test_input($_POST["employment"]);
-        
         $employer = test_input($_POST["employer"]);
         
         if (!preg_match("/^[a-zA-Z ]*$/", $employer)) {
             $nameErr = "Only letters and white space allowed is allowed in the employer field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
 
@@ -123,12 +109,12 @@
           
           if(in_array($file_ext,$expensions)=== false){
              $error="extension not allowed, please choose a JPEG or PNG file.";
-             header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $error);exit();
+             header("Location:registration_form.php?valError=" . $error);exit();
           }
           
           if($file_size > 2097152){
              $error='File size must be excately 2 MB';
-             header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $error);exit();
+             header("Location:registration_form.php?valError=" . $error);exit();
           }
           
           move_uploaded_file($file_tmp,"/var/www/html/project/mindfire/profile_app/profile_pic/".$file_name);
@@ -137,64 +123,58 @@
         $photo = $file_name;
         
         $residenceStreet = test_input($_POST["residenceStreet"]);
-        
         $resedenceCity = test_input($_POST["resedenceCity"]);
         
         if (!preg_match("/^[a-zA-Z ]*$/", $resedenceCity)) {
             $nameErr = "Only letters and white space allowed is allowed in the residence city field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
         $resedenceState = test_input($_POST["residenceState"]);
-        
         $residenceZip = test_input($_POST["residenceZip"]);
         
         if (!preg_match("/^[0-9]*$/", $residenceZip)) {
             $nameErr = "Only numbers are allowed in the residence zip field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
         $residenceFax = test_input($_POST["residenceFax"]);
-        
         $officeStreet = test_input($_POST["officeStreet"]);
-        
         $officeCity = test_input($_POST["officeCity"]);
         
         if (!preg_match("/^[a-zA-Z ]*$/", $officeCity)) {
             $nameErr = "Only letters and white space allowed is allowed in the office city field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
         $officeState = test_input($_POST["officeState"]);
-        
         $officeZip = test_input($_POST["officeZip"]);
         
         if (!preg_match("/^[0-9]*$/", $officeZip)) {
             $nameErr = "Only numbers are allowed in the office zip field";
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?valError=" . $nameErr);
+            header("Location:registration_form.php?valError=" . $nameErr);
             exit();
         }
         
         $officeFax = test_input($_POST["officeFax"]);
-        
         $note = test_input($_POST["note"]);
-        
         $commMedium = $_POST["commMed"]; // its array
         
         //insert the employee details
-        $query1 = "INSERT INTO employee (`prefix`,`firstName`,`middleName`,`lastName`,`gender`,`dob`,`mobile`,`landline`,`email`,`maritalStatus`,`employment`,
-                        `employer`,`photo`,`note`)
-                  VALUES ('$prefix','$firstName','$middleName','$lastName','$gender','$dob','$mobile','$landline','$email','$maritalStatus','$employment',
-                        '$employer','$photo','$note')";
+        $query1 = "INSERT INTO employee (`prefix`,`firstName`,`middleName`,`lastName`,`gender`,`dob`,`mobile`,
+            `landline`,`email`,`maritalStatus`,`employment`,
+            `employer`,`photo`,`note`)
+            VALUES ('$prefix','$firstName','$middleName','$lastName','$gender','$dob','$mobile','$landline',
+            '$email','$maritalStatus','$employment',
+            '$employer','$photo','$note')";
         
         if ($conn->query($query1) === TRUE) {
-            
             $empID = $conn->insert_id;
         } else {
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="
+            header("Location:registration_form.php?Message="
              . " " . $conn->connect_error);
             exit();
         }
@@ -203,26 +183,21 @@
                 VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax') ,
                 ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
         if (!$conn->query($query2)) {
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="
+            header("Location:registration_form.php?Message="
              . " " . $conn->connect_error);
             exit();
         }
         
-        
         // insert communication medium
         $msg = in_array("msg", $commMedium) ? 1 : 0;
-        
         $comEmail = in_array("mail", $commMedium) ? 1 : 0;
-        
         $call = in_array("phone", $commMedium) ? 1 : 0;
-        
         $any = in_array("any", $commMedium) ? 1 : 0;
-        
         $query4 = "INSERT INTO commMedium (`empId`,`msg`,`email`,`call`,`any`)
-                VALUES ('$empID','$msg','$comEmail','$call','$any')";
-        //Change here,make it a sigle if
+            VALUES ('$empID','$msg','$comEmail','$call','$any')";
+        
         if (!$conn->query($query4)) {
-            header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message="
+            header("Location:registration_form.php?Message="
              . " " . $conn->connect_error);
             exit();
         }
@@ -255,11 +230,11 @@
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li><a href="http://localhost/project/mindfire/profile_app/registration_form.php">SIGN UP</a>
+                        <li><a href="registration_form.php">SIGN UP</a>
                         </li>
                         <li><a href="#">LOG IN</a>
                         </li>
-                        <li><a href="http://localhost/project/mindfire/profile_app/register.php">DETAILS</a>
+                        <li><a href="register.php">DETAILS</a>
                         </li>
                     </ul>
                 </div>
@@ -271,16 +246,16 @@
                 <h2>Registered Employees</h2>
           		<?php
                 $query4 = "SELECT employee.eid , employee.firstName , employee.middleName , employee.lastName ,employee.gender ,
-                            employee.dob , employee.mobile , employee.landline , employee.email , employee.maritalStatus , 
-                            employee.employment , employee.employer , commMedium.empId ,commMedium.msg , commMedium.email 
-                            AS comm_email, 
-                            commMedium.call , commMedium.any ,address.eid , address.type , address.street , address.city ,
-                            address.state , address.zip , address.fax 
-                            FROM employee JOIN commMedium ON employee.eid = commMedium.empId
-                            JOIN address ON  employee.eid = address.eid";
-                //Display some some message when no data is present in the table
+                    employee.dob , employee.mobile , employee.landline , employee.email , employee.maritalStatus , 
+                    employee.employment , employee.employer , commMedium.empId ,commMedium.msg , commMedium.email 
+                    AS comm_email, 
+                    commMedium.call , commMedium.any ,address.eid , address.type , address.street , address.city ,
+                    address.state , address.zip , address.fax 
+                    FROM employee JOIN commMedium ON employee.eid = commMedium.empId
+                    JOIN address ON  employee.eid = address.eid";
+                //TO DO :Display some message when no data is present in the table
                 $result = mysqli_query($conn, $query4) or 
-                           header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
+                           header("Location:registration_form.php?Message= :(");
                 $employeeId = 0;
                 ?>
 

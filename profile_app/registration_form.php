@@ -1,43 +1,43 @@
 <?php
     require_once('db_conn.php');
+    require_once('constants.php');
     
     if (!empty($_REQUEST['Message'])) {
-        
         echo "Sorry , something bad happened .Please try after some time." . $_REQUEST['Message'];
     }
+
     if (!empty($_GET['valError'])) {
-        
         echo $_GET['valError'];
     }
+
     if (isset($_GET["userId"]) && isset($_GET["userAction"])) {
-        
-        $selectEmpDetails = "SELECT employee.eid , employee.prefix , employee.firstName , employee.middleName , 
-                            employee.lastName ,employee.gender ,
-                            employee.dob , employee.mobile , employee.landline , employee.email , employee.maritalStatus , 
-                            employee.employment , employee.employer , employee.note , employee.photo , commMedium.empId ,commMedium.msg , commMedium.email 
-                            AS comm_email, commMedium.call , commMedium.any 
-                            FROM employee JOIN commMedium ON employee.eid = commMedium.empId
-                            WHERE eid =" . $_GET["userId"];
-        
+        $selectEmpDetails = "SELECT employee.eid, employee.prefix, employee.firstName, employee.middleName, 
+            employee.lastName, employee.gender, employee.dob, employee.mobile, employee.landline, employee.email,
+            employee.maritalStatus, employee.employment, employee.employer, employee.note, employee.photo,
+            commMedium.empId, commMedium.msg, commMedium.email AS comm_email, commMedium.call , commMedium.any 
+            FROM employee JOIN commMedium ON employee.eid = commMedium.empId WHERE eid =" . $_GET["userId"];
+
         $residenceAddress = "SELECT address.eid , address.type , address.street , address.city ,
-                            address.state , address.zip , address.fax FROM address
-                            WHERE address.eid =" . $_GET["userId"] . " AND address.type = 1";
-        
+            address.state , address.zip , address.fax FROM address
+            WHERE address.eid =" . $_GET["userId"] . " AND address.type = 1";
+
         $officeAddress = "SELECT address.eid , address.type , address.street , address.city ,
-                            address.state , address.zip , address.fax FROM address
-                            WHERE address.eid =" . $_GET["userId"] . " AND address.type = 2";
-        
-        $result1 = mysqli_query($conn, $selectEmpDetails) or header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
-        
-        $result2 = mysqli_query($conn, $residenceAddress) or header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
-        
-        $result3 = mysqli_query($conn, $officeAddress) or header("Location:http://localhost/project/mindfire/profile_app/registration_form.php?Message= :(");
-        
+            address.state , address.zip , address.fax FROM address
+            WHERE address.eid =" . $_GET["userId"] . " AND address.type = 2";
+
+        $result1 = mysqli_query($conn, $selectEmpDetails) or 
+            header("Location:registration_form.php?Message= :(");
         $empDetails = $result1->fetch_assoc();
-        
+
+        $result2 = mysqli_query($conn, $residenceAddress) or 
+            header("Location:registration_form.php?Message= :(");
         $empResidence = $result2->fetch_assoc();
+
+        $result3 = mysqli_query($conn, $officeAddress) or 
+            header("Location:registration_form.php?Message= :(");
+        $empOffice = $result3->fetch_assoc();        
         
-        $empOffice = $result3->fetch_assoc();
+        
     }
 ?>
 <!DOCTYPE html>
@@ -46,7 +46,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Registration Form</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" 
+            integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     </head>
     <body>
         <nav class="navbar navbar-default">
