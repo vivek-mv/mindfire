@@ -9,6 +9,44 @@
         echo "Sorry , something bad happened .Please try after some time." . $_REQUEST['Message'];
     }
 
+    $states = array(
+        'Andaman and Nicobar Islands',
+        'Andhra Pradesh',
+        'Arunachal Pradesh',
+        'Assam',
+        'Bihar',
+        'Chandigarh',
+        'Chhattisgarh',
+        'Dadra and Nagar Haveli',
+        'Daman and Diu',
+        'Delhi',
+        'Goa',
+        'Gujarat',
+        'Haryana',
+        'Himachal Pradesh',
+        'Jammu and Kashmir',
+        'Jharkhand',
+        'Karnataka',
+        'Kerala',
+        'Lakshadweep',
+        'Madhya Pradesh',
+        'Maharashtra',
+        'Manipur',
+        'Meghalaya',
+        'Mizoram',
+        'Nagaland',
+        'Orissa',
+        'Pondicherry',
+        'Punjab',
+        'Rajasthan',
+        'Sikkim',
+        'Tamil Nadu',
+        'Tripura',
+        'Uttaranchal',
+        'Uttar Pradesh',
+        'West Bengal'
+    );
+
     //Validate the input fields only if the request method is POST
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //Initialize error to check for any errors that occur during validation
@@ -110,7 +148,7 @@
           }
           
           if($file_size > 2097152){
-             $imageErr='File size must be excately 2 MB';
+             $imageErr='File size must be less than 2 MB';
              $error++;
           }
           $photo = $file_name;
@@ -155,6 +193,7 @@
             $officeZipErr = "Only numbers are allowed";
             $error++;
         }
+
         if ( !empty($officeZip) && strlen($officeZip) != 6 ) {
             $officeZipErr = "zip number should be 6 digits";
             $error++;
@@ -173,7 +212,7 @@
         //Insert the user data in the database if there are no errors.
         if( $error == 0 && $_POST["submit"]=="SUBMIT" ) {
             //upload Image
-            move_uploaded_file($_FILES['image']['tmp_name'],"/var/www/html/project/mindfire/profile_app/profile_pic/".$_FILES['image']['name']);
+            move_uploaded_file($_FILES['image']['tmp_name'],ROOT_IMAGE_PATH."profile_app/profile_pic/".$_FILES['image']['name']);
             //insert the employee details
             $insertEmp = "INSERT INTO employee (`prefix`,`firstName`,`middleName`,`lastName`,`gender`,`dob`,`mobile`,
                 `landline`,`email`,`maritalStatus`,`employment`,
@@ -191,10 +230,10 @@
                 exit();
             }
             // insert residence and office address
-            $query2 = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
+            $insertAdd = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
                     VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax') ,
                     ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
-            if (!$conn->query($query2)) {
+            if (!$conn->query($insertAdd)) {
                 header("Location:registration_form.php?Message="
                  . " " . $conn->connect_error);
                 exit();
@@ -205,17 +244,20 @@
             $comEmail = in_array("mail", $commMedium) ? 1 : 0;
             $call = in_array("phone", $commMedium) ? 1 : 0;
             $any = in_array("any", $commMedium) ? 1 : 0;
-            $query4 = "INSERT INTO commMedium (`empId`,`msg`,`email`,`call`,`any`)
+            $insertCommMedium = "INSERT INTO commMedium (`empId`,`msg`,`email`,`call`,`any`)
                 VALUES ('$empID','$msg','$comEmail','$call','$any')";
             
-            if (!$conn->query($query4)) {
+            if (!$conn->query($insertCommMedium)) {
                 header("Location:registration_form.php?Message="
                  . " " . $conn->connect_error);
                 exit();
             }
+
+            //If successfully inserted ,then redirect to details page
             header("Location:details.php");
         }
 
+        //If there are no errors and submit name is update
         if( $error == 0 && $_POST["submit"]=="UPDATE" ) {
 
             if( isset($_FILES['image']) && !empty($_FILES['image']['name']) && $_FILES['image']['size'] != 0) {
@@ -228,22 +270,24 @@
 
                 $row = $result->fetch_assoc();
 
-                if ( !unlink("/var/www/html/project/mindfire/profile_app/profile_pic/".$row["photo"]) ) {
+                if ( !unlink(ROOT_IMAGE_PATH."profile_app/profile_pic/".$row["photo"]) ) {
                   header("Location:details.php?Message= Unable to delete image");
                 }
             }
 
+            //update residence address
             $updateResidenceAdd = "UPDATE address SET street = '" . $residenceStreet . "', city ='" . $resedenceCity . "',
             state = '" . $resedenceState . "' , zip = '" . $residenceZip . "', fax = '" .$residenceFax .
             "' where eid = " . $_GET["userId"] . " && type = 1";
             $conn->query($updateResidenceAdd) or header("Location:registration_form.php?Message=database error" . $conn->connect_error);
-        
+            
+            //update office address
             $updateOfficeAdd = "UPDATE address SET street = '" . $officeStreet . "', city ='" . $officeCity . "',
                             state = '" . $officeState . "' , zip = '" . $officeZip . "', fax = '" . $officeFax .
                             "' where eid = " . $_GET["userId"] . " && type = 2";
             $conn->query($updateOfficeAdd) or header("Location:registration_form.php?Message=" . " " . $conn->connect_error);
             
-            // insert communication medium
+            // update communication medium
             $msg = in_array("msg", $commMedium) ? 1 : 0;
             $comEmail = in_array("mail", $commMedium) ? 1 : 0;
             $call = in_array("phone", $commMedium) ? 1 : 0;
@@ -253,19 +297,28 @@
                 `call` ='" . $call . "' , any ='" . $any . "' where empId =" . $_GET["userId"];
             $conn->query($updateCommMedium) or header("Location:registration_form.php?Message=" . " " . $conn->connect_error);
             
-            
+            //If photo is empty then dont update photo
+            if( empty($photo) ) {
+                $insertImage ="";
+            }else {
+                $insertImage = ", photo = '".$photo."'";
+            }
+            //update employee details
             $updateEmpDetails = "UPDATE employee SET prefix = '" . $prefix . "' , firstName = '" . $firstName . "' , 
                 middleName = '" . $middleName . "' , lastName = '" . $lastName . "' ,  gender = '" . $gender .
                 "' , dob = '" . $dob . "' , mobile = '" . $mobile . "' , landline='" . $landline . "', email ='" 
                 . $email . "', maritalStatus= '" . $maritalStatus . "' ,employment = '" . $employment . "' ,
-                employer='" . $employer . "' , photo = '" . $photo . "' ,note= '" . $note . "' where eid = " 
+                employer='" . $employer ."'".$insertImage . ",note= '" . $note . "' where eid = " 
                 . $_GET["userId"];
+                
             $conn->query($updateEmpDetails) or header("Location:registration_form.php?Message=" . " " . $conn->connect_error);
             
+            //If update is successfull then redirect to details page
             header("Location:details.php");
         }
     }
 
+    //When user clicks the update button in the details page,then this code is executed
     if (isset($_GET["userId"]) && isset($_GET["userAction"]) ) {
         $selectEmpDetails = "SELECT employee.eid, employee.prefix, employee.firstName, employee.middleName, 
             employee.lastName, employee.gender, employee.dob, employee.mobile, employee.landline, employee.email,
@@ -490,7 +543,12 @@
                                 <label class="col-md-3 control-label">Upload Photo</label>
                                 <div class="col-md-7">
                                     <span class="error"> <?php if( !empty($imageErr) ) echo "*".$imageErr;?></span>
-                                    <input  name="image" class="input-file" type="file">
+                                    <input  name="image" class="input-file" type="file" 
+                                    <?php 
+                                        if( isset($empDetails["photo"]) && !empty($empDetails["photo"]) ) {
+                                            echo 'filename='.$empDetails["photo"];
+                                        }
+                                    ?> >
                                     <?php if( isset($empDetails["photo"]) && !empty($empDetails["photo"]) ) 
                                             echo '<img src="profile_pic/'.$empDetails["photo"].'"  alt="profile pic" 
                                                 height="200" width="200" />'; ?>
@@ -529,76 +587,15 @@
                                 <div class="col-md-7">
                                     <select name="residenceState" class="form-control" value="Arunachal Pradesh">
                                         <option value="">Select State</option>
-                                        <option value="Andaman and Nicobar Islands"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Andaman and Nicobar Islands") echo 'selected="selected"'; ?> >Andaman and Nicobar Islands</option>
-                                        <option value="Andhra Pradesh"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Andhra Pradesh") echo 'selected="selected"'; ?> >Andhra Pradesh</option>
-                                        <option value="Arunachal Pradesh"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Arunachal Pradesh") echo 'selected="selected"'; ?> >Arunachal Pradesh</option>
-                                        <option value="Assam"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Assam") echo 'selected="selected"'; ?> >Assam</option>
-                                        <option value="Bihar"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Bihar") echo 'selected="selected"'; ?> >Bihar</option>
-                                        <option value="Chandigarh"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Chandigarh") echo 'selected="selected"'; ?> >Chandigarh</option>
-                                        <option value="Chhattisgarh"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Chhattisgarh") echo 'selected="selected"'; ?> >Chhattisgarh</option>
-                                        <option value="Dadra and Nagar Haveli"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Dadra and Nagar Haveli") echo 'selected="selected"'; ?> >Dadra and Nagar Haveli</option>
-                                        <option value="Daman and Diu"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Daman and Diu") echo 'selected="selected"'; ?> >Daman and Diu</option>
-                                        <option value="Delhi"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Delhi") echo 'selected="selected"'; ?> >Delhi</option>
-                                        <option value="Goa"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Goa") echo 'selected="selected"'; ?> >Goa</option>
-                                        <option value="Gujarat"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Gujarat") echo 'selected="selected"'; ?> >Gujarat</option>
-                                        <option value="Haryana"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Haryana") echo 'selected="selected"'; ?> >Haryana</option>
-                                        <option value="Himachal Pradesh"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Himachal Pradesh") echo 'selected="selected"'; ?> >Himachal Pradesh</option>
-                                        <option value="Jammu and Kashmir"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Jammu and Kashmir") echo 'selected="selected"'; ?> >Jammu and Kashmir</option>
-                                        <option value="Jharkhand"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Jharkhand") echo 'selected="selected"'; ?> >Jharkhand</option>
-                                        <option value="Karnataka"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Karnataka") echo 'selected="selected"'; ?> >Karnataka</option>
-                                        <option value="Kerala"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Kerala") echo 'selected="selected"'; ?> >Kerala</option>
-                                        <option value="Lakshadweep"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Lakshadweep") echo 'selected="selected"'; ?> >Lakshadweep</option>
-                                        <option value="Madhya Pradesh"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Madhya Pradesh") echo 'selected="selected"'; ?> >Madhya Pradesh</option>
-                                        <option value="Maharashtra"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Maharashtra") echo 'selected="selected"'; ?> >Maharashtra</option>
-                                        <option value="Manipur"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Manipur") echo 'selected="selected"'; ?> >Manipur</option>
-                                        <option value="Meghalaya"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Meghalaya") echo 'selected="selected"'; ?> >Meghalaya</option>
-                                        <option value="Mizoram"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Mizoram") echo 'selected="selected"'; ?> >Mizoram</option>
-                                        <option value="Nagaland"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Nagaland") echo 'selected="selected"'; ?> >Nagaland</option>
-                                        <option value="Orissa"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Orissa") echo 'selected="selected"'; ?> >Orissa</option>
-                                        <option value="Pondicherry"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Pondicherry") echo 'selected="selected"'; ?> >Pondicherry</option>
-                                        <option value="Punjab"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Punjab") echo 'selected="selected"'; ?> >Punjab</option>
-                                        <option value="Rajasthan"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Rajasthan") echo 'selected="selected"'; ?> >Rajasthan</option>
-                                        <option value="Sikkim"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Sikkim") echo 'selected="selected"'; ?> >Sikkim</option>
-                                        <option value="Tamil Nadu"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Tamil Nadu") echo 'selected="selected"'; ?> >Tamil Nadu</option>
-                                        <option value="Tripura"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Tripura") echo 'selected="selected"'; ?> >Tripura</option>
-                                        <option value="Uttaranchal"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Uttaranchal") echo 'selected="selected"'; ?> >Uttaranchal</option>
-                                        <option value="Uttar Pradesh"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="Uttar Pradesh") echo 'selected="selected"'; ?> >Uttar Pradesh</option>
-                                        <option value="West Bengal"
-                                            <?php if ( isset($empResidence["state"]) && $empResidence["state"]=="West Bengal") echo 'selected="selected"'; ?> >West Bengal</option>
+                                        <?php
+                                            foreach ($states as $state_name) {
+                                                 echo '<option value="' . $state_name . '" ' 
+                                                    . (( isset($empResidence["state"]) 
+                                                        && $empResidence["state"]==$state_name ) 
+                                                    ? ('selected="selected"') : ('')) . '>' 
+                                                    . $state_name . '</option>';
+                                            }
+                                        ?>
                                     </select>
                                 </div>
                             </div>
@@ -651,76 +648,15 @@
                                 <div class="col-md-7">
                                     <select name="officeState" class="form-control">
                                         <option value="">Select State</option>
-                                        <option value="Andaman and Nicobar Islands"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Andaman and Nicobar Islands") echo 'selected="selected"'; ?> >Andaman and Nicobar Islands</option>
-                                        <option value="Andhra Pradesh"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Andhra Pradesh") echo 'selected="selected"'; ?> >Andhra Pradesh</option>
-                                        <option value="Arunachal Pradesh"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Arunachal Pradesh") echo 'selected="selected"'; ?> >Arunachal Pradesh</option>
-                                        <option value="Assam"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Assam") echo 'selected="selected"'; ?> >Assam</option>
-                                        <option value="Bihar"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Bihar") echo 'selected="selected"'; ?> >Bihar</option>
-                                        <option value="Chandigarh"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Chandigarh") echo 'selected="selected"'; ?> >Chandigarh</option>
-                                        <option value="Chhattisgarh"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Chhattisgarh") echo 'selected="selected"'; ?> >Chhattisgarh</option>
-                                        <option value="Dadra and Nagar Haveli"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Dadra and Nagar Haveli") echo 'selected="selected"'; ?> >Dadra and Nagar Haveli</option>
-                                        <option value="Daman and Diu"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Daman and Diu") echo 'selected="selected"'; ?> >Daman and Diu</option>
-                                        <option value="Delhi"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Delhi") echo 'selected="selected"'; ?> >Delhi</option>
-                                        <option value="Goa"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Goa") echo 'selected="selected"'; ?> >Goa</option>
-                                        <option value="Gujarat"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Gujarat") echo 'selected="selected"'; ?> >Gujarat</option>
-                                        <option value="Haryana"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Haryana") echo 'selected="selected"'; ?> >Haryana</option>
-                                        <option value="Himachal Pradesh"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Himachal Pradesh") echo 'selected="selected"'; ?> >Himachal Pradesh</option>
-                                        <option value="Jammu and Kashmir"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Jammu and Kashmir") echo 'selected="selected"'; ?> >Jammu and Kashmir</option>
-                                        <option value="Jharkhand"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Jharkhand") echo 'selected="selected"'; ?> >Jharkhand</option>
-                                        <option value="Karnataka"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Karnataka") echo 'selected="selected"'; ?> >Karnataka</option>
-                                        <option value="Kerala"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Kerala") echo 'selected="selected"'; ?> >Kerala</option>
-                                        <option value="Lakshadweep"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Lakshadweep") echo 'selected="selected"'; ?> >Lakshadweep</option>
-                                        <option value="Madhya Pradesh"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Madhya Pradesh") echo 'selected="selected"'; ?> >Madhya Pradesh</option>
-                                        <option value="Maharashtra"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Maharashtra") echo 'selected="selected"'; ?> >Maharashtra</option>
-                                        <option value="Manipur"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Manipur") echo 'selected="selected"'; ?> >Manipur</option>
-                                        <option value="Meghalaya"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Meghalaya") echo 'selected="selected"'; ?> >Meghalaya</option>
-                                        <option value="Mizoram"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Mizoram") echo 'selected="selected"'; ?> >Mizoram</option>
-                                        <option value="Nagaland"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Nagaland") echo 'selected="selected"'; ?> >Nagaland</option>
-                                        <option value="Orissa"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Orissa") echo 'selected="selected"'; ?> >Orissa</option>
-                                        <option value="Pondicherry"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Pondicherry") echo 'selected="selected"'; ?> >Pondicherry</option>
-                                        <option value="Punjab"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Punjab") echo 'selected="selected"'; ?> >Punjab</option>
-                                        <option value="Rajasthan"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Rajasthan") echo 'selected="selected"'; ?> >Rajasthan</option>
-                                        <option value="Sikkim"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Sikkim") echo 'selected="selected"'; ?> >Sikkim</option>
-                                        <option value="Tamil Nadu"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Tamil Nadu") echo 'selected="selected"'; ?> >Tamil Nadu</option>
-                                        <option value="Tripura"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Tripura") echo 'selected="selected"'; ?> >Tripura</option>
-                                        <option value="Uttaranchal"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Uttaranchal") echo 'selected="selected"'; ?> >Uttaranchal</option>
-                                        <option value="Uttar Pradesh"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="Uttar Pradesh") echo 'selected="selected"'; ?> >Uttar Pradesh</option>
-                                        <option value="West Bengal"
-                                            <?php if ( isset($empOffice["state"]) && $empOffice["state"]=="West Bengal") echo 'selected="selected"'; ?> >West Bengal</option>
+                                        <?php
+                                            foreach ($states as $state_name) {
+                                                 echo '<option value="' . $state_name . '" ' 
+                                                    . (( isset($empOffice["state"]) 
+                                                        && $empOffice["state"]==$state_name ) 
+                                                    ? ('selected="selected"') : ('')) . '>' 
+                                                    . $state_name . '</option>';
+                                            }
+                                        ?>
                                     </select>
                                 </div>
                             </div>
@@ -794,7 +730,7 @@
                                     </div>
                                 </div>
                             </div>
-                    </fieldset>
+                        </fieldset>
                     </div>
                 </div>
                 <div class="row text-center">

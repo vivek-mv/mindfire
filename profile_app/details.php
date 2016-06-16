@@ -1,5 +1,7 @@
 <?php
+    //include db connection
     require_once('db_conn.php');
+    //include the constants file
     require_once('constants.php');
     
     //Display error message if delete fails
@@ -7,18 +9,23 @@
         echo "Sorry delete failed !, please try after some time ";
     }
     
+    //when user clicks the delete button in the details page
     if (isset($_GET["userAction"]) && $_GET["userAction"] == "delete") {
         //Query to delete a row from the registration database with the respective employee id
         $deleteAddress = "DELETE FROM address WHERE eid=" . $_GET["userId"] . ";";
         $deleteCommMode = "DELETE FROM commMedium WHERE empId=" . $_GET["userId"] . ";";
         $deleteEmployee = "DELETE FROM employee WHERE eid=" . $_GET["userId"] . ";";
+
+        //delete employee image
         $image ="SELECT employee.photo FROM employee WHERE eid=" . $_GET["userId"] . ";";
-        $result = mysqli_query($conn, $image) or 
+        $delImage = mysqli_query($conn, $image) or 
                     header("Location:details.php?Message= delete failed:(");
-        $row = $result->fetch_assoc();
+        $row = $delImage->fetch_assoc();
         if ( !empty($row["photo"])  && !unlink(ROOT_IMAGE_PATH."profile_app/profile_pic/".$row["photo"]) ) {
             header("Location:details.php?Message= Unable to delete image");
         }
+
+        //delete employee details
         mysqli_query($conn, $deleteAddress) or 
             header("Location:details.php?Message= delete failed:(");
         mysqli_query($conn, $deleteCommMode) or 
@@ -30,7 +37,6 @@
     }
   
 ?>
-<!-- make this page responsive -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,15 +80,17 @@
           		<?php
                 $query4 = "SELECT employee.eid , employee.firstName , employee.middleName , employee.lastName ,employee.gender ,
                     employee.dob , employee.mobile , employee.landline , employee.email , employee.maritalStatus , 
-                    employee.employment , employee.employer , commMedium.empId ,commMedium.msg , commMedium.email 
+                    employee.employment , employee.employer, employee.photo, commMedium.empId ,commMedium.msg , commMedium.email 
                     AS comm_email, 
                     commMedium.call , commMedium.any ,address.eid , address.type , address.street , address.city ,
                     address.state , address.zip , address.fax 
                     FROM employee JOIN commMedium ON employee.eid = commMedium.empId
                     JOIN address ON  employee.eid = address.eid";
-                //TO DO :Display some message when no data is present in the table
+                
                 $result = mysqli_query($conn, $query4) or 
                            header("Location:registration_form.php?Message= :(");
+
+                //when no data is present in the table,display message
                 if($result->num_rows == 0) {
                     echo '<h1> Sorry ! Nothing to display </h1>';
                     exit();
@@ -103,12 +111,14 @@
                         <th>Comm. Mode</th>
                         <th title = "Address Residence">Address (R)</th>
                         <th title = "Address Office">Address (O)</th>
+                        <th>Photo</th>
                         <th>Update</th>
                         <th>Delete</th>
                       </tr>
                     </thead>
                     <tbody>
         	    	<?php
+                        //fetch all the rows to display and loop through them
                         while ( $row = $result->fetch_assoc() ) {
 
                             if ( $employeeId != $row["empId"] ) {
@@ -158,18 +168,28 @@
                                 echo "</td>";
                             }
 
+                            //when address is residence
                             if ( $row["type"] == 1 ) {
                                 echo "<td>" . $row["street"] . "<br>" . $row["city"] . "," . $row["zip"] . "<br>" . $row["state"] . "</td>";
                             }
 
+                            //when address is office
                             if ( $row["type"] == 2 ) {
                                 echo "<td>" . $row["street"] . "<br>" . $row["city"] . "," . $row["zip"] . "<br>" . $row["state"] . "</td>";
+                                echo '<td>';
 
+                                //Display photo only if photo is present
+                                if( !empty($row["photo"]) ) {
+                                    echo '<img src="profile_pic/'.$row["photo"].'" alt="profile pic " height="150" width="150" >';
+                                }
+
+                                echo '</td>';
                                 echo "<td><a href='registration_form.php?userId=" . $row["eid"] . "&userAction=update' target='_self' >
                                              <span class='glyphicon glyphicon-pencil' aria-hidden='true'></span></a></td>";
 
                                 echo "<td><a href='details.php?userId=" . $row["eid"] . "&userAction=delete' target='_self' > 
                                             <span class='glyphicon glyphicon-remove' aria-hidden='true'></span></a></td>";
+
                             }
 
                             if ( $employeeId == $row["eid"] ) {
