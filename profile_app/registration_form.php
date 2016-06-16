@@ -212,7 +212,7 @@
         //Insert the user data in the database if there are no errors.
         if( $error == 0 && $_POST["submit"]=="SUBMIT" ) {
             //upload Image
-            move_uploaded_file($_FILES['image']['tmp_name'],ROOT_IMAGE_PATH."profile_app/profile_pic/".$_FILES['image']['name']);
+            move_uploaded_file($_FILES['image']['tmp_name'],APP_PATH."/profile_pic/".$_FILES['image']['name']);
             //insert the employee details
             $insertEmp = "INSERT INTO employee (`prefix`,`firstName`,`middleName`,`lastName`,`gender`,`dob`,`mobile`,
                 `landline`,`email`,`maritalStatus`,`employment`,
@@ -261,7 +261,7 @@
         if( $error == 0 && $_POST["submit"]=="UPDATE" ) {
 
             if( isset($_FILES['image']) && !empty($_FILES['image']['name']) && $_FILES['image']['size'] != 0) {
-                move_uploaded_file($_FILES['image']['tmp_name'],"/var/www/html/project/mindfire/profile_app/profile_pic/".$_FILES['image']['name']);
+                move_uploaded_file($_FILES['image']['tmp_name'],APP_PATH ."/profile_pic/".$_FILES['image']['name']);
 
                 $image ="SELECT employee.photo FROM employee WHERE eid=" . $_GET["userId"] . ";";
 
@@ -270,7 +270,7 @@
 
                 $row = $result->fetch_assoc();
 
-                if ( !unlink(ROOT_IMAGE_PATH."profile_app/profile_pic/".$row["photo"]) ) {
+                if ( !unlink(APP_PATH."/profile_pic/".$row["photo"]) ) {
                   header("Location:details.php?Message= Unable to delete image");
                 }
             }
