@@ -9,6 +9,15 @@
         echo "Sorry , something bad happened .Please try after some time." . $_REQUEST['Message'];
     }
 
+    //Check for form action
+    if( (isset($_GET['userAction']) && $_GET['userAction']=='update') 
+        || ( isset($_GET["userId"]) && $_GET["userId"] > 0) ) {
+        $form_action = 'registration_form.php?userId='.$_GET["userId"]; 
+    } else {
+        $form_action = 'registration_form.php';
+    }
+    
+    //States array to store all the states for select dropdown 
     $states = array(
         'Andaman and Nicobar Islands',
         'Andhra Pradesh',
@@ -47,10 +56,19 @@
         'West Bengal'
     );
 
+    //Start session to store the form fields
+    session_start();
+
+    //If a request is for update then set a flag in a session variable ,so that, update button
+    //could be retained
+    if (isset($_GET["userId"]) && isset($_GET["userAction"]) ) {
+        $_SESSION["retainUpdateBtn"] = 1;
+    } 
+
     //Validate the input fields only if the request method is POST
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //Initialize error to check for any errors that occur during validation
-        $error=0;
+        $error = 0;
         
          /**
          * Performs validation for the form input fields
@@ -67,6 +85,7 @@
         }
         
         $prefix = validate($_POST["prefix"]);
+        $_SESSION["prefix"] = $prefix;
         $firstName = validate($_POST["firstName"]);
         
         if (!preg_match("/^[a-zA-Z ]*$/", $firstName)) {
@@ -89,7 +108,9 @@
         }
         
         $gender = validate($_POST["gender"]);
+        $_SESSION["gender"] = $gender;
         $dob = validate($_POST["dob"]);
+        $_SESSION["dob"] = $dob;
         $mobile = validate($_POST["mobile"]);
         
         if (!preg_match("/^[0-9]*$/", $mobile)) {
@@ -122,7 +143,9 @@
         }
         
         $maritalStatus = validate($_POST["maritalStatus"]);
+        $_SESSION["maritalStatus"] = $maritalStatus;
         $employment = validate($_POST["employment"]);
+        $_SESSION["employment"] = $employment;
         $employer = validate($_POST["employer"]);
         
         if (!preg_match("/^[a-zA-Z ]*$/", $employer)) {
@@ -154,8 +177,6 @@
           $photo = $file_name;
         }
         
-        
-        
         $residenceStreet = validate($_POST["residenceStreet"]);
         $resedenceCity = validate($_POST["resedenceCity"]);
         
@@ -165,6 +186,8 @@
         }
         
         $resedenceState = validate($_POST["residenceState"]);
+        $_SESSION["residenceState"] = $resedenceState;
+
         $residenceZip = validate($_POST["residenceZip"]);
         
         if (!preg_match("/^[0-9]*$/", $residenceZip)) {
@@ -187,6 +210,7 @@
         }
         
         $officeState = validate($_POST["officeState"]);
+        $_SESSION["officeState"] = $officeState;
         $officeZip = validate($_POST["officeZip"]);
         
         if (!preg_match("/^[0-9]*$/", $officeZip)) {
@@ -204,7 +228,8 @@
 
         //Check for Communication Medium,if its empty then assign an empty array
         if( isset($_POST["commMed"]) ) {
-           $commMedium = $_POST["commMed"];  
+           $commMedium = $_POST["commMed"];
+           $_SESSION["commMedium"] = $commMedium;  
         }else{
             $commMedium=array();
         }
@@ -253,6 +278,9 @@
                 exit();
             }
 
+            //Destroy the session 
+            session_unset();
+            session_destroy();
             //If successfully inserted ,then redirect to details page
             header("Location:details.php");
         }
@@ -313,6 +341,9 @@
                 
             $conn->query($updateEmpDetails) or header("Location:registration_form.php?Message=" . " " . $conn->connect_error);
             
+            //Destroy the session 
+            session_unset();
+            session_destroy();
             //If update is successfull then redirect to details page
             header("Location:details.php");
         }
@@ -345,7 +376,6 @@
         $result3 = mysqli_query($conn, $officeAddress) or 
             header("Location:registration_form.php?Message= :(");
         $empOffice = $result3->fetch_assoc();        
-        
     }
 ?>
 <!DOCTYPE html>
@@ -386,16 +416,16 @@
         </nav>
         <div class="container">
         <h1><?php 
-                if( isset($_GET['userAction']) && $_GET['userAction']=='update' ) {
+                if( (isset($_GET['userAction']) && $_GET['userAction']=='update') 
+                    || ( isset($_GET["userId"]) && $_GET["userId"] > 0) ) {
                     echo "Please edit your data";
                 }else {
                     echo "REGISTER";
                 }
             ?>
         </h1>
-        <form action=<?php if( isset($_GET['userAction']) && $_GET['userAction']=='update' ) 
-        {echo 'registration_form.php?userId='.$_GET["userId"]; } else {echo 'registration_form.php';} ?> method="post" 
-        role="form" class="form-horizontal" enctype="multipart/form-data">
+        <form action=<?php echo $form_action; ?> method="post" role="form" class="form-horizontal" 
+            enctype="multipart/form-data">
             <div class="row">
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <fieldset>
@@ -406,8 +436,14 @@
                                 <label class="col-md-3 control-label" for="selectbasic1">Prefix</label>
                                 <div class="col-md-7">
                                     <select id="selectbasic1" name="prefix" class="form-control" >
-                                        <option value="mr" <?php if ( isset($empDetails["prefix"]) && $empDetails["prefix"]=="mr") echo 'selected="selected"'; ?> >Mr</option>
-                                        <option value="mis" <?php if ( isset($empDetails["prefix"]) && $empDetails["prefix"]=="mis") echo 'selected="selected"'; ?> >Miss</option>
+                                        <option value="mr" 
+                                        <?php 
+                                            if ( (isset($empDetails["prefix"]) && $empDetails["prefix"]=="mr") 
+                                                || (!empty($_SESSION["prefix"]) && $_SESSION["prefix"] == "mr" ) )
+                                                echo 'selected="selected"'; 
+                                        ?> >Mr</option>
+                                        <option value="mis" <?php if ( (isset($empDetails["prefix"]) && $empDetails["prefix"]=="mis") 
+                                        || (!empty($_SESSION["prefix"]) && $_SESSION["prefix"] == "mis") ) echo 'selected="selected"'; ?> >Miss</option>
                                     </select>
                                 </div>
                             </div>
@@ -451,12 +487,14 @@
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="gender" value="f" 
-                                        <?php if( isset($empDetails["gender"]) && $empDetails["gender"]=="f") echo 'checked="checked"'; ?> >
+                                        <?php if( (isset($empDetails["gender"]) && $empDetails["gender"]=="f")
+                                        || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "f")) echo 'checked="checked"'; ?> >
                                     Female
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="gender" value="o"
-                                        <?php if( isset($empDetails["gender"]) && $empDetails["gender"]=="o") echo 'checked="checked"'; ?> >
+                                        <?php if( (isset($empDetails["gender"]) && $empDetails["gender"]=="o")
+                                        || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "o") ) echo 'checked="checked"'; ?> >
                                     Other
                                     </label>
                                 </div>
@@ -465,7 +503,10 @@
                                 <label class="col-md-3 control-label" for="datepicker">D.O.B</label>  
                                 <div class="col-md-7">
                                     <input name="dob" type="date" placeholder="D.O.B" class="form-control input-md" 
-                                        <?php if( isset($empDetails["dob"]) ) echo 'value="'.$empDetails["dob"].'"'; ?> >
+                                        <?php if( isset($empDetails["dob"]) ) { echo 'value="'.$empDetails["dob"].'"'; }
+                                        else if( !empty($_SESSION["dob"]) ) {
+                                            echo 'value="'.$_SESSION["dob"].'"';
+                                        }?> >
                                 </div>
                             </div>
                             <!-- Text input-->
@@ -508,7 +549,8 @@
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="maritalStatus" value="unmarried"
-                                        <?php if( isset($empDetails["maritalStatus"]) && $empDetails["maritalStatus"]=="unmarried") echo 'checked="checked"'; ?> >
+                                        <?php if( (isset($empDetails["maritalStatus"]) && $empDetails["maritalStatus"]=="unmarried") 
+                                        || (!empty($_SESSION["maritalStatus"]) && $_SESSION["maritalStatus"] == "unmarried")) echo 'checked="checked"'; ?> >
                                     Unmarried
                                     </label> 
                                 </div>
@@ -523,7 +565,8 @@
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="employment" value="unemployed"
-                                        <?php if( isset($empDetails["employment"]) && $empDetails["employment"]=="unemployed") echo 'checked="checked"'; ?>>
+                                        <?php if( (isset($empDetails["employment"]) && $empDetails["employment"]=="unemployed") 
+                                        || (!empty($_SESSION["employment"]) && $_SESSION["employment"] == "unemployed") ) echo 'checked="checked"'; ?>>
                                     Unemployed
                                     </label> 
                                 </div>
@@ -585,15 +628,14 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >State</label>
                                 <div class="col-md-7">
-                                    <select name="residenceState" class="form-control" value="Arunachal Pradesh">
+                                    <select name="residenceState" class="form-control">
                                         <option value="">Select State</option>
                                         <?php
                                             foreach ($states as $state_name) {
-                                                 echo '<option value="' . $state_name . '" ' 
-                                                    . (( isset($empResidence["state"]) 
-                                                        && $empResidence["state"]==$state_name ) 
-                                                    ? ('selected="selected"') : ('')) . '>' 
-                                                    . $state_name . '</option>';
+                                                echo '<option value="' . $state_name . '" ' 
+                                                . (( (isset($empResidence["state"]) && $empResidence["state"]==$state_name) 
+                                                || (!empty($_SESSION["residenceState"]) && $_SESSION["residenceState"] == $state_name))
+                                                ? ('selected="selected"') : ('')) . '>' . $state_name . '</option>';
                                             }
                                         ?>
                                     </select>
@@ -650,11 +692,10 @@
                                         <option value="">Select State</option>
                                         <?php
                                             foreach ($states as $state_name) {
-                                                 echo '<option value="' . $state_name . '" ' 
-                                                    . (( isset($empOffice["state"]) 
-                                                        && $empOffice["state"]==$state_name ) 
-                                                    ? ('selected="selected"') : ('')) . '>' 
-                                                    . $state_name . '</option>';
+                                                echo '<option value="' . $state_name . '" ' . 
+                                                (( (isset($empOffice["state"]) && $empOffice["state"]==$state_name) 
+                                                || (!empty($_SESSION["officeState"]) && $_SESSION["officeState"] == $state_name) ) 
+                                                ? ('selected="selected"') : ('')) . '>' . $state_name . '</option>';
                                             }
                                         ?>
                                     </select>
@@ -708,22 +749,26 @@
                                         <div class="col-xs-9 col-sm-8 col-md-8 col-lg-8 col-md-offset-2 col-lg-offset-2">
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="mail" name="commMed[]" value="mail"
-                                                    <?php if( isset($empDetails["comm_email"]) && $empDetails["comm_email"]=="1") echo 'checked'; ?> >
+                                                    <?php if( (isset($empDetails["comm_email"]) && 
+                                                    $empDetails["comm_email"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("mail", $_SESSION["commMedium"]) ? TRUE : FALSE) ) echo 'checked'; ?> >
                                                 <label for="mail">Mail</label>
                                             </div>
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="message" name="commMed[]" value="msg"
-                                                    <?php if( isset($empDetails["msg"]) && $empDetails["msg"]=="1") echo 'checked'; ?> >
+                                                    <?php if( (isset($empDetails["msg"]) && 
+                                                    $empDetails["msg"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("msg", $_SESSION["commMedium"]) ? TRUE : FALSE) ) echo 'checked'; ?> >
                                                 <label for="message">Message</label>
                                             </div>
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="phone" name="commMed[]" value="phone"
-                                                    <?php if( isset($empDetails["call"]) && $empDetails["call"]=="1") echo 'checked'; ?> >
+                                                    <?php if( (isset($empDetails["call"]) && 
+                                                    $empDetails["call"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("phone", $_SESSION["commMedium"]) ? TRUE : FALSE) )echo 'checked'; ?> >
                                                 <label for="phone">Phone</label>
                                             </div>
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="any" name="commMed[]" value="any" 
-                                                    <?php if( isset($empDetails["any"]) && $empDetails["any"]=="1") echo 'checked'; ?> >
+                                                    <?php if( (isset($empDetails["any"]) && 
+                                                    $empDetails["any"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("any", $_SESSION["commMedium"]) ? TRUE : FALSE) ) echo 'checked'; ?> >
                                                 <label for="any">Any</label>
                                             </div>
                                         </div>
@@ -735,8 +780,10 @@
                 </div>
                 <div class="row text-center">
                     <input type="submit" name="submit" value=
-                        <?php if( isset($_GET['userAction']) && $_GET['userAction']=='update' ) {echo 'UPDATE'; } else {echo 'SUBMIT';} ?> class="btn btn-primary"> &nbsp;  &nbsp;  &nbsp;
-                    <input type= <?php if( isset($_GET['userAction']) && $_GET['userAction']=='update' ) {echo 'hidden'; } else {echo 'reset';} ?> name="Reset" class="btn btn-danger">
+                        <?php if( (isset($_GET['userAction']) && $_GET['userAction']=='update') || ( isset($_SESSION["retainUpdateBtn"]) 
+                        && $_SESSION["retainUpdateBtn"] == 1)  ) {echo 'UPDATE'; } else {echo 'SUBMIT';} ?> class="btn btn-primary"> &nbsp;  &nbsp;  &nbsp;
+                    <input type= <?php if( (isset($_GET['userAction']) && $_GET['userAction']=='update') || 
+                    ( isset($_SESSION["retainUpdateBtn"]) && $_SESSION["retainUpdateBtn"] == 1) ) {echo 'hidden'; } else {echo 'reset';} ?> name="Reset" class="btn btn-danger">
                 </div>
         </form>
         </div>
