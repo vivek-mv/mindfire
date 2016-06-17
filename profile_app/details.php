@@ -29,8 +29,8 @@
         $delImage = mysqli_query($conn, $image) or 
                     header("Location:details.php?Message= delete failed:(");
         $getImg = $delImage->fetch_assoc();
-
-        if ( !empty($row["photo"])  && !unlink(APP_PATH . "/profile_pic/".$getImg["photo"]) ) {
+        
+        if ( !empty($getImg["photo"])  && !unlink(APP_PATH . "/profile_pic/".$getImg["photo"]) ) {
 
             header("Location:details.php?Message= Unable to delete image");
         }

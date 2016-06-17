@@ -1,13 +1,13 @@
 <?php 
 	Class NexaOrder {
-		$models = array( "model1", "model2", "model3", "model4");
+		public $models = array();
+		public $car;
 		public function placeOrder() {
-			$this->manufacture($model);
-			return $models;
-		}
 
-		private function manufacture($carModel) {
-			$this->car = new ManufactureCar($carModel);
+			$this->manufacture($model);
+			$this->car = new manufactureCar();
+			array_push($this->models,$model);
+			return $models;
 		}
 	}
 ?>

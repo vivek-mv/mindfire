@@ -8,6 +8,16 @@
     //Include Constants file 
     require_once('constants.php');
 
+    function checkedStatus( $key, $value ) {
+        if( (isset($empDetails[$key]) && $empDetails[$key] == $value) 
+            || (!empty($_SESSION[$key]) && $_SESSION[$key] == $value)) {
+            
+            return true;
+        }
+
+        return false;
+    }
+
     //Check for any error messages from details page
     if (!empty($_REQUEST['Message'])) {
         echo "Sorry , something bad happened .Please try after some time." . $_REQUEST['Message'];
@@ -546,8 +556,7 @@
                                     <label class="radio-inline">
                                     <input type="radio" name="gender" value="f" 
                                     <?php 
-                                        if( (isset($empDetails["gender"]) && $empDetails["gender"]=="f")
-                                            || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "f")) {
+                                        if( checkedStatus("gender", "f") ) {
 
                                             echo 'checked="checked"';
                                         } 
@@ -558,11 +567,10 @@
                                     <label class="radio-inline">
                                     <input type="radio" name="gender" value="o"
                                     <?php 
-                                        if( (isset($empDetails["gender"]) && $empDetails["gender"]=="o")
-                                            || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "o") ) {
+                                        if( checkedStatus("gender", "o") ) {
 
                                             echo 'checked="checked"';
-                                        }
+                                        } 
                                     ?>
                                     >
                                     Other
@@ -665,8 +673,7 @@
                                     <label class="radio-inline">
                                     <input type="radio" name="maritalStatus" value="unmarried"
                                     <?php 
-                                        if( (isset($empDetails["maritalStatus"]) && $empDetails["maritalStatus"] == "unmarried") 
-                                            || (!empty($_SESSION["maritalStatus"]) && $_SESSION["maritalStatus"] == "unmarried")) {
+                                        if( checkedStatus("maritalStatus", "unmarried") ) {
 
                                             echo 'checked="checked"';
                                         }
@@ -687,8 +694,7 @@
                                     <label class="radio-inline">
                                     <input type="radio" name="employment" value="unemployed"
                                         <?php
-                                            if( (isset($empDetails["employment"]) && $empDetails["employment"] == "unemployed") 
-                                                || (!empty($_SESSION["employment"]) && $_SESSION["employment"] == "unemployed") ) {
+                                            if( checkedStatus("employment", "unemployed") ) {
 
                                                 echo 'checked="checked"';
                                             }
@@ -907,7 +913,7 @@
                                             foreach ($states as $state_name) {
 
                                                 echo '<option value="' . $state_name . '" ' . 
-                                                    (( (isset($empOffice["state"]) && $empOffice["state"]==$state_name) 
+                                                    (( (isset($empOffice["state"]) && $empOffice["state"] == $state_name) 
                                                     || (!empty($_SESSION["officeState"]) && $_SESSION["officeState"] == $state_name) ) 
                                                     ? ('selected="selected"') : ('')) . '>' . $state_name . '</option>';
                                             }
@@ -1005,6 +1011,7 @@
                                                 <?php
                                                     if( (isset($empDetails["msg"]) && $empDetails["msg"]=="1") 
                                                         || ( isset($_SESSION["commMedium"]) && in_array("msg", $_SESSION["commMedium"]) ? TRUE : FALSE) ) {
+                                                           
                                                             echo 'checked';
                                                     } 
                                                 ?>

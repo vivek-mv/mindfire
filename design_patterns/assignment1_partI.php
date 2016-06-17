@@ -3,15 +3,15 @@
 	Class DbConnect {
 		//Static member variable to hold the connection object
 		public static $conn = "";
+		private $servername = "localhost";
+		private	$username = "root";
+		private $password = "mindfire";
+		private $dbname = "registration";
 
 		function __construct() {
-			$servername = "localhost";
-			$username = "root";
-			$password = "mindfire";
-			$dbname = "registration";
 
 			// Create connection
-			self::$conn = new mysqli($servername, $username, $password, $dbname);
+			self::$conn = new mysqli($this->servername, $this->username ,$this->password,$this->dbname);
 			// Check connection
 			if (self::$conn->connect_error) {
 			    echo "Connection failed: " . $conn->connect_error;
