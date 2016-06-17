@@ -1,4 +1,8 @@
 <?php
+    /*This page validates the form fields . 
+    *If there are no errors ,then it performs
+    *submit or update functionality.
+    */
     //Include Database Connection
     require_once('db_conn.php');
     //Include Constants file 
@@ -9,7 +13,7 @@
         echo "Sorry , something bad happened .Please try after some time." . $_REQUEST['Message'];
     }
 
-    //Check for form action
+    //Check and set form action
     if( (isset($_GET['userAction']) && $_GET['userAction']=='update') 
         || ( isset($_GET["userId"]) && $_GET["userId"] > 0) ) {
         $form_action = 'registration_form.php?userId='.$_GET["userId"]; 
@@ -17,7 +21,7 @@
         $form_action = 'registration_form.php';
     }
     
-    //States array to store all the states for select dropdown 
+    //States array to store all the states for select state dropdown 
     $states = array(
         'Andaman and Nicobar Islands',
         'Andhra Pradesh',
@@ -74,8 +78,8 @@
          * Performs validation for the form input fields
          *
          * @access public
-         * @param string $data
-         * @return string
+         * @param String $data
+         * @return String
          */
         function validate($data) {
             $data = trim($data);
@@ -236,18 +240,18 @@
         
         //Insert the user data in the database if there are no errors.
         if( $error == 0 && $_POST["submit"]=="SUBMIT" ) {
-            //upload Image
+
+            //Move the image to a specific folder
             move_uploaded_file($_FILES['image']['tmp_name'],APP_PATH."/profile_pic/".$_FILES['image']['name']);
             //insert the employee details
-            $insertEmp = "INSERT INTO employee (`prefix`,`firstName`,`middleName`,`lastName`,`gender`,`dob`,`mobile`,
-                `landline`,`email`,`maritalStatus`,`employment`,
-                `employer`,`photo`,`note`)
-                VALUES ('$prefix','$firstName','$middleName','$lastName','$gender','$dob','$mobile','$landline',
-                '$email','$maritalStatus','$employment',
-                '$employer','$photo','$note')";
+            $insertEmp = "INSERT INTO employee (`prefix`, `firstName`, `middleName`, `lastName`, `gender`, `dob`, `mobile`,
+                `landline`, `email`, `maritalStatus`, `employment`, `employer`, `photo`, `note`)
+                VALUES ('$prefix', '$firstName', '$middleName', '$lastName', '$gender', '$dob', '$mobile', '$landline',
+                '$email', '$maritalStatus' ,'$employment', '$employer', '$photo', '$note')";
             
             //Get the last insert id as empId to insert address and comm. medium
             if ($conn->query($insertEmp) === TRUE) {
+
                 $empID = $conn->insert_id;
             } else {
                 header("Location:registration_form.php?Message="
@@ -256,8 +260,9 @@
             }
             // insert residence and office address
             $insertAdd = "INSERT INTO address (`eid`,`type`,`street`,`city`,`state`,`zip`,`fax`)
-                    VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip','$residenceFax') ,
-                    ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
+                    VALUES ('$empID','1','$residenceStreet','$resedenceCity','$resedenceState','$residenceZip',
+                    '$residenceFax') , ('$empID','2','$officeStreet','$officeCity','$officeState','$officeZip','$officeFax')";
+
             if (!$conn->query($insertAdd)) {
                 header("Location:registration_form.php?Message="
                  . " " . $conn->connect_error);
@@ -303,19 +308,19 @@
                 }
             }
 
-            //update residence address
+            //Update residence address
             $updateResidenceAdd = "UPDATE address SET street = '" . $residenceStreet . "', city ='" . $resedenceCity . "',
             state = '" . $resedenceState . "' , zip = '" . $residenceZip . "', fax = '" .$residenceFax .
             "' where eid = " . $_GET["userId"] . " && type = 1";
             $conn->query($updateResidenceAdd) or header("Location:registration_form.php?Message=database error" . $conn->connect_error);
             
-            //update office address
+            //Update office address
             $updateOfficeAdd = "UPDATE address SET street = '" . $officeStreet . "', city ='" . $officeCity . "',
                             state = '" . $officeState . "' , zip = '" . $officeZip . "', fax = '" . $officeFax .
                             "' where eid = " . $_GET["userId"] . " && type = 2";
             $conn->query($updateOfficeAdd) or header("Location:registration_form.php?Message=" . " " . $conn->connect_error);
             
-            // update communication medium
+            // Update communication medium
             $msg = in_array("msg", $commMedium) ? 1 : 0;
             $comEmail = in_array("mail", $commMedium) ? 1 : 0;
             $call = in_array("phone", $commMedium) ? 1 : 0;
@@ -431,53 +436,106 @@
                     <fieldset>
                         <legend>Personal Details</legend>
                         <div class="well">
-                            <!-- Select Basic -->
+                            <!-- Select dropdown for prefix -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="selectbasic1">Prefix</label>
                                 <div class="col-md-7">
                                     <select id="selectbasic1" name="prefix" class="form-control" >
                                         <option value="mr" 
                                         <?php 
-                                            if ( (isset($empDetails["prefix"]) && $empDetails["prefix"]=="mr") 
-                                                || (!empty($_SESSION["prefix"]) && $_SESSION["prefix"] == "mr" ) )
-                                                echo 'selected="selected"'; 
-                                        ?> >Mr</option>
-                                        <option value="mis" <?php if ( (isset($empDetails["prefix"]) && $empDetails["prefix"]=="mis") 
-                                        || (!empty($_SESSION["prefix"]) && $_SESSION["prefix"] == "mis") ) echo 'selected="selected"'; ?> >Miss</option>
+                                            if ( (isset($empDetails["prefix"]) && $empDetails["prefix"] == "mr") 
+                                                || (!empty($_SESSION["prefix"]) && $_SESSION["prefix"] == "mr" ) ) {
+
+                                                echo 'selected="selected"';
+                                            } 
+                                        ?> 
+                                        >Mr
+                                        </option>
+                                        
+                                        <option value="mis" 
+                                        <?php 
+                                            if ( (isset($empDetails["prefix"]) && $empDetails["prefix"] == "mis") 
+                                                || ( !empty($_SESSION["prefix"]) && $_SESSION["prefix"] == "mis") ) {
+
+                                                echo 'selected="selected"';
+                                            } 
+                                        ?> >Miss
+                                        </option>
                                     </select>
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for first name -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="firstName">First Name</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($firstnameErr) ) echo "*".$firstnameErr;?></span>
+                                    <span class="error"> 
+                                    <?php 
+                                        if( !empty($firstnameErr) ) {
+                                            echo "*".$firstnameErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="firstName" type="text" placeholder="First Name" class="form-control input-md" 
-                                        <?php if( isset($empDetails["firstName"]) ) echo 'value="'.$empDetails["firstName"].'"';
-                                        if( isset($firstName) ) echo 'value='.$firstName;?> required>
+                                    <?php
+
+                                        if( isset($empDetails["firstName"]) ) {
+                                            echo 'value="'.$empDetails["firstName"].'"';
+                                        }
+
+                                        if( isset($firstName) ) {
+                                            echo 'value='.$firstName;
+                                        }
+                                    ?> 
+                                    required >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for middle name -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="middleName">Middle Name</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($middleNameErr) ) echo "*".$middleNameErr;?></span>
+                                    <span class="error"> 
+                                    <?php 
+                                        if( !empty($middleNameErr) ) {
+                                            echo "*".$middleNameErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="middleName" type="text" placeholder="Middle Name" class="form-control input-md"
-                                        <?php if( isset($empDetails["middleName"]) ) echo 'value="'.$empDetails["middleName"].'"'; 
-                                        if( isset($middleName) ) echo 'value='.$middleName;?> >
+                                    <?php
+                                        if( isset($empDetails["middleName"]) ) {
+                                            echo 'value="'.$empDetails["middleName"].'"';
+                                        } 
+                                        if( isset($middleName) ) {
+                                            echo 'value='.$middleName;
+                                        }
+                                    ?>
+                                     >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for last name -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="lastName">Last Name</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($lastNameErr) ) echo "*".$lastNameErr;?></span>
+                                    <span class="error"> 
+                                    <?php
+                                        if( !empty($lastNameErr) ) {
+                                            echo "*".$lastNameErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="lastName" type="text" placeholder="Last Name" class="form-control input-md" 
-                                        <?php if( isset($empDetails["lastName"]) ) echo 'value="'.$empDetails["lastName"].'"'; 
-                                        if( isset($lastName) ) echo 'value='.$lastName;?> >
+                                    <?php
+                                        if( isset($empDetails["lastName"]) ) {
+                                            echo 'value="'.$empDetails["lastName"].'"';
+                                        } 
+                                        if( isset($lastName) ) {
+                                            echo 'value='.$lastName;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Multiple Radios (inline) -->
+                            <!-- Radio button for gender -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="gender">Gender</label>
                                 <div class="col-md-7"> 
@@ -487,59 +545,116 @@
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="gender" value="f" 
-                                        <?php if( (isset($empDetails["gender"]) && $empDetails["gender"]=="f")
-                                        || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "f")) echo 'checked="checked"'; ?> >
+                                    <?php 
+                                        if( (isset($empDetails["gender"]) && $empDetails["gender"]=="f")
+                                            || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "f")) {
+
+                                            echo 'checked="checked"';
+                                        } 
+                                    ?>
+                                    >
                                     Female
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="gender" value="o"
-                                        <?php if( (isset($empDetails["gender"]) && $empDetails["gender"]=="o")
-                                        || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "o") ) echo 'checked="checked"'; ?> >
+                                    <?php 
+                                        if( (isset($empDetails["gender"]) && $empDetails["gender"]=="o")
+                                            || (!empty($_SESSION["gender"]) && $_SESSION["gender"] == "o") ) {
+
+                                            echo 'checked="checked"';
+                                        }
+                                    ?>
+                                    >
                                     Other
                                     </label>
                                 </div>
                             </div>
+                            <!-- Input field for date -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="datepicker">D.O.B</label>  
                                 <div class="col-md-7">
                                     <input name="dob" type="date" placeholder="D.O.B" class="form-control input-md" 
-                                        <?php if( isset($empDetails["dob"]) ) { echo 'value="'.$empDetails["dob"].'"'; }
-                                        else if( !empty($_SESSION["dob"]) ) {
+                                    <?php
+                                        if( isset($empDetails["dob"]) ) { 
+                                            echo 'value="'.$empDetails["dob"].'"'; 
+                                        }
+                                        else if ( !empty($_SESSION["dob"]) ) {
                                             echo 'value="'.$_SESSION["dob"].'"';
-                                        }?> >
+                                        }
+                                    ?> 
+                                    >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for mobile number -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="phone">Moblie</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($mobileErr) ) echo "*".$mobileErr;?></span>
+                                    <span class="error"> 
+                                    <?php 
+                                        if( !empty($mobileErr) ) {
+                                            echo "*".$mobileErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="mobile" type="text" placeholder="9999-9999-9999" class="form-control input-md"
-                                        <?php if( isset($empDetails["mobile"]) ) echo 'value="'.$empDetails["mobile"].'"'; 
-                                        if( isset($mobile) ) echo 'value='.$mobile;?> >
+                                    <?php 
+                                        if( isset($empDetails["mobile"]) ) {
+                                            echo 'value="'.$empDetails["mobile"].'"';
+                                        } 
+                                        if( isset($mobile) ) {
+                                            echo 'value='.$mobile;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for landline number -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="phone">Landline</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($landlineErr) ) echo "*".$landlineErr;?></span>
+                                    <span class="error"> 
+                                    <?php
+                                        if( !empty($landlineErr) ) {
+                                            echo "*".$landlineErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="landline" type="text" placeholder="9999-9999999" class="form-control input-md"
-                                        <?php if( isset($empDetails["landline"]) ) echo 'value="'.$empDetails["landline"].'"'; 
-                                        if( isset($landline) ) echo 'value='.$landline;?> >
+                                    <?php
+                                        if( isset($empDetails["landline"]) ) {
+                                            echo 'value="'.$empDetails["landline"].'"';
+                                        } 
+                                        if( isset($landline) ) {
+                                            echo 'value='.$landline;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for email -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="firstName">Email</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($emailErr) ) echo "*".$emailErr;?></span>
+                                    <span class="error">
+                                    <?php 
+                                        if( !empty($emailErr) ) {
+                                            echo "*".$emailErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="email" type="email" placeholder="example@mail.com" class="form-control input-md"
-                                        <?php if( isset($empDetails["email"]) ) echo 'value="'.$empDetails["email"].'"'; 
-                                        if( isset($email) ) echo 'value='.$email;?>  required>
+                                    <?php 
+                                        if( isset($empDetails["email"]) ) {
+                                            echo 'value="'.$empDetails["email"].'"';
+                                        } 
+                                        if( isset($email) ) {
+                                            echo 'value='.$email;
+                                        }
+                                    ?>
+                                    required >
                                 </div>
                             </div>
-                            <!-- Multiple Radios (inline) -->
+                            <!-- Radio button for marital status -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="m_status">Marital Status</label>
                                 <div class="col-md-7"> 
@@ -549,13 +664,19 @@
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="maritalStatus" value="unmarried"
-                                        <?php if( (isset($empDetails["maritalStatus"]) && $empDetails["maritalStatus"]=="unmarried") 
-                                        || (!empty($_SESSION["maritalStatus"]) && $_SESSION["maritalStatus"] == "unmarried")) echo 'checked="checked"'; ?> >
+                                    <?php 
+                                        if( (isset($empDetails["maritalStatus"]) && $empDetails["maritalStatus"] == "unmarried") 
+                                            || (!empty($_SESSION["maritalStatus"]) && $_SESSION["maritalStatus"] == "unmarried")) {
+
+                                            echo 'checked="checked"';
+                                        }
+                                    ?>
+                                    >
                                     Unmarried
                                     </label> 
                                 </div>
                             </div>
-                            <!-- Multiple Radios (inline) -->
+                            <!-- Radio button for employment -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="employment">Employment</label>
                                 <div class="col-md-7"> 
@@ -565,36 +686,65 @@
                                     </label> 
                                     <label class="radio-inline">
                                     <input type="radio" name="employment" value="unemployed"
-                                        <?php if( (isset($empDetails["employment"]) && $empDetails["employment"]=="unemployed") 
-                                        || (!empty($_SESSION["employment"]) && $_SESSION["employment"] == "unemployed") ) echo 'checked="checked"'; ?>>
+                                        <?php
+                                            if( (isset($empDetails["employment"]) && $empDetails["employment"] == "unemployed") 
+                                                || (!empty($_SESSION["employment"]) && $_SESSION["employment"] == "unemployed") ) {
+
+                                                echo 'checked="checked"';
+                                            }
+                                        ?>
+                                        >
                                     Unemployed
                                     </label> 
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for employer -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="employer">Employer</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($employerErr) ) echo "*".$employerErr;?></span>
+                                    <span class="error"> 
+                                    <?php 
+                                        if( !empty($employerErr) ) {
+                                            echo "*".$employerErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="employer" type="text" placeholder="Employer" class="form-control input-md"
-                                        <?php if( isset($empDetails["employer"]) ) echo 'value="'.$empDetails["employer"].'"'; 
-                                        if( isset($employer) ) echo 'value='.$employer;?> >
+                                    <?php
+                                        if( isset($empDetails["employer"]) ) {
+                                            echo 'value="'.$empDetails["employer"].'"';
+                                        } 
+                                        if( isset($employer) ) {
+                                            echo 'value='.$employer;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- File Button --> 
+                            <!-- Input field for image upload --> 
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Upload Photo</label>
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($imageErr) ) echo "*".$imageErr;?></span>
+                                    <span class="error">
+                                    <?php
+                                        if( !empty($imageErr) ) {
+                                            echo "*".$imageErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="image" class="input-file" type="file" 
                                     <?php 
                                         if( isset($empDetails["photo"]) && !empty($empDetails["photo"]) ) {
                                             echo 'filename='.$empDetails["photo"];
                                         }
-                                    ?> >
-                                    <?php if( isset($empDetails["photo"]) && !empty($empDetails["photo"]) ) 
+                                    ?>
+                                    >
+                                    <?php 
+                                        if( isset($empDetails["photo"]) && !empty($empDetails["photo"]) ) { 
                                             echo '<img src="profile_pic/'.$empDetails["photo"].'"  alt="profile pic" 
-                                                height="200" width="200" />'; ?>
+                                                height="200" width="200" />';
+                                        } 
+                                    ?>
                                     
                                 </div>
                             </div>
@@ -605,59 +755,101 @@
                     <fieldset>
                         <legend>Residence Address</legend>
                         <div class="well">
-                            <!-- Text input-->
+                            <!-- Input field for residence street -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >Street</label>  
                                 <div class="col-md-7">
                                     <input  name="residenceStreet" type="text" placeholder="Street" class="form-control input-md"
-                                        <?php if( isset($empResidence["street"]) ) echo 'value="'.$empResidence["street"].'"'; 
-                                        if( isset($residenceStreet) ) echo 'value='.$residenceStreet;?> >
+                                    <?php
+                                        if( isset($empResidence["street"]) ) {
+                                            echo 'value="'.$empResidence["street"].'"';
+                                        } 
+                                        if( isset($residenceStreet) ) {
+                                            echo 'value='.$residenceStreet;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for residence city-->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >City</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($residenceCityErr) ) echo "*".$residenceCityErr;?></span>
+                                    <span class="error"> 
+                                    <?php
+                                        if( !empty($residenceCityErr) ) {
+                                            echo "*".$residenceCityErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="resedenceCity" type="text" placeholder="City" class="form-control input-md"
-                                        <?php if( isset($empResidence["city"]) ) echo 'value="'.$empResidence["city"].'"'; 
-                                        if( isset($resedenceCity) ) echo 'value='.$resedenceCity;?> >
+                                    <?php
+                                        if( isset($empResidence["city"]) ) {
+                                            echo 'value="'.$empResidence["city"].'"';
+                                        } 
+                                        if( isset($resedenceCity) ) {
+                                            echo 'value='.$resedenceCity;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Select Basic -->
+                            <!-- Input field for residence state dropdown -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >State</label>
                                 <div class="col-md-7">
                                     <select name="residenceState" class="form-control">
                                         <option value="">Select State</option>
                                         <?php
+                                            //Here $states is the array,declared at the top of the page
                                             foreach ($states as $state_name) {
+
                                                 echo '<option value="' . $state_name . '" ' 
-                                                . (( (isset($empResidence["state"]) && $empResidence["state"]==$state_name) 
-                                                || (!empty($_SESSION["residenceState"]) && $_SESSION["residenceState"] == $state_name))
-                                                ? ('selected="selected"') : ('')) . '>' . $state_name . '</option>';
+                                                    . (( (isset($empResidence["state"]) && $empResidence["state"]==$state_name) 
+                                                    || (!empty($_SESSION["residenceState"]) && $_SESSION["residenceState"] == $state_name))
+                                                    ? ('selected="selected"') : ('')) . '>' . $state_name . '</option>';
                                             }
                                         ?>
                                     </select>
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- input field for zip -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >Zip</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($residenceZipErr) ) echo "*".$residenceZipErr;?></span>
+                                    <span class="error"> 
+                                    <?php
+                                        if( !empty($residenceZipErr) ) {
+                                            echo "*".$residenceZipErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input name="residenceZip" type="text" placeholder="Zip" class="form-control input-md"
-                                        <?php if( isset($empResidence["zip"]) ) echo 'value="'.$empResidence["zip"].'"'; 
-                                        if( isset($residenceZip) ) echo 'value='.$residenceZip;?> >
+                                    <?php 
+                                        if( isset($empResidence["zip"]) ) {
+                                            echo 'value="'.$empResidence["zip"].'"';
+                                        } 
+                                        if( isset($residenceZip) ) {
+                                            echo 'value='.$residenceZip;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for residence fax -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >Fax</label>  
                                 <div class="col-md-7">
                                     <input name="residenceFax" type="text" placeholder="Fax" class="form-control input-md"
-                                        <?php if( isset($empResidence["fax"]) ) echo 'value="'.$empResidence["fax"].'"'; 
-                                        if( isset($residenceFax) ) echo 'value='.$residenceFax;?> >
+                                    <?php
+                                        if( isset($empResidence["fax"]) ) {
+                                            echo 'value="'.$empResidence["fax"].'"';
+                                        } 
+                                        if( isset($residenceFax) ) {
+                                            echo 'value='.$residenceFax;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -665,59 +857,101 @@
                     <fieldset>
                         <legend>Office Address</legend>
                         <div class="well">
-                            <!-- Text input-->
+                            <!-- Input field for office street -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >Street</label>  
                                 <div class="col-md-7">
                                     <input  name="officeStreet" type="text" placeholder="Street" class="form-control input-md"
-                                        <?php if( isset($empOffice["street"]) ) echo 'value="'.$empOffice["street"].'"'; 
-                                        if( isset($officeStreet) ) echo 'value='.$officeStreet;?> >
+                                    <?php 
+                                        if( isset($empOffice["street"]) ) {
+                                            echo 'value="'.$empOffice["street"].'"';
+                                        } 
+                                        if( isset($officeStreet) ) {
+                                            echo 'value='.$officeStreet;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for office city -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >City</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($officeCityErr) ) echo "*".$officeCityErr;?></span>
+                                    <span class="error"> 
+                                    <?php
+                                        if( !empty($officeCityErr) ) {
+                                            echo "*".$officeCityErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input  name="officeCity" type="text" placeholder="City" class="form-control input-md"
-                                        <?php if( isset($empOffice["city"]) ) echo 'value="'.$empOffice["city"].'"'; 
-                                        if( isset($officeCity) ) echo 'value='.$officeCity;?> >
+                                    <?php 
+                                        if( isset($empOffice["city"]) ) {
+                                            echo 'value="'.$empOffice["city"].'"';
+                                        } 
+                                        if( isset($officeCity) ) {
+                                            echo 'value='.$officeCity;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Select Basic -->
+                            <!-- Input field for office state dropdown -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >State</label>
                                 <div class="col-md-7">
                                     <select name="officeState" class="form-control">
                                         <option value="">Select State</option>
                                         <?php
+                                            //Here $states array is declared at the top of the page
                                             foreach ($states as $state_name) {
+
                                                 echo '<option value="' . $state_name . '" ' . 
-                                                (( (isset($empOffice["state"]) && $empOffice["state"]==$state_name) 
-                                                || (!empty($_SESSION["officeState"]) && $_SESSION["officeState"] == $state_name) ) 
-                                                ? ('selected="selected"') : ('')) . '>' . $state_name . '</option>';
+                                                    (( (isset($empOffice["state"]) && $empOffice["state"]==$state_name) 
+                                                    || (!empty($_SESSION["officeState"]) && $_SESSION["officeState"] == $state_name) ) 
+                                                    ? ('selected="selected"') : ('')) . '>' . $state_name . '</option>';
                                             }
                                         ?>
                                     </select>
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for office zip -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >Zip</label>  
                                 <div class="col-md-7">
-                                    <span class="error"> <?php if( !empty($officeZipErr) ) echo "*".$officeZipErr;?></span>
+                                    <span class="error"> 
+                                    <?php
+                                        if( !empty($officeZipErr) ) {
+                                            echo "*".$officeZipErr;
+                                        }
+                                    ?>
+                                    </span>
                                     <input name="officeZip" type="text" placeholder="Zip" class="form-control input-md"
-                                        <?php if( isset($empOffice["zip"]) ) echo 'value="'.$empOffice["zip"].'"'; 
-                                        if( isset($officeZip) ) echo 'value='.$officeZip;?> >
+                                    <?php
+                                        if( isset($empOffice["zip"]) ) {
+                                            echo 'value="'.$empOffice["zip"].'"';
+                                        } 
+                                        if( isset($officeZip) ) {
+                                            echo 'value='.$officeZip;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
-                            <!-- Text input-->
+                            <!-- Input field for office fax -->
                             <div class="form-group">
                                 <label class="col-md-3 control-label" >Fax</label>  
                                 <div class="col-md-7">
                                     <input name="officeFax" type="text" placeholder="Fax" class="form-control input-md"
-                                        <?php if( isset($empOffice["fax"]) ) echo 'value="'.$empOffice["fax"].'"'; 
-                                        if( isset($officeFax) ) echo 'value='.$officeFax;?> >
+                                    <?php
+                                        if( isset($empOffice["fax"]) ) {
+                                            echo 'value="'.$empOffice["fax"].'"';
+                                        } 
+                                        if( isset($officeFax) ) {
+                                            echo 'value='.$officeFax;
+                                        }
+                                    ?>
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -731,13 +965,20 @@
                         <div class="well">
                             <div class="row">
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <!-- Textarea -->
+                                    <!-- Input field for note -->
                                     <div class="form-group">
                                         <label class="col-md-3 control-label" for="textarea">Note</label>
                                         <div class="col-md-7">                     
-                                            <textarea class="form-control" id="note" name="note" rows="3"
-                                            ><?php if( isset($empDetails["note"]) ) echo $empDetails["note"]; 
-                                            if( isset($note) ) echo $note;?></textarea>
+                                            <textarea class="form-control" id="note" name="note" rows="3">
+                                            <?php
+                                                if( isset($empDetails["note"]) ) {
+                                                    echo $empDetails["note"];
+                                                } 
+                                                if( isset($note) ) {
+                                                    echo $note;
+                                                }
+                                            ?>
+                                            </textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -749,26 +990,49 @@
                                         <div class="col-xs-9 col-sm-8 col-md-8 col-lg-8 col-md-offset-2 col-lg-offset-2">
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="mail" name="commMed[]" value="mail"
-                                                    <?php if( (isset($empDetails["comm_email"]) && 
-                                                    $empDetails["comm_email"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("mail", $_SESSION["commMedium"]) ? TRUE : FALSE) ) echo 'checked'; ?> >
+                                                <?php
+                                                    if( (isset($empDetails["comm_email"]) && $empDetails["comm_email"]=="1") 
+                                                        || ( isset($_SESSION["commMedium"]) && in_array("mail", $_SESSION["commMedium"]) ? TRUE : FALSE) ) {
+                                                            
+                                                        echo 'checked';
+                                                    }
+                                                ?> 
+                                                >
                                                 <label for="mail">Mail</label>
                                             </div>
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="message" name="commMed[]" value="msg"
-                                                    <?php if( (isset($empDetails["msg"]) && 
-                                                    $empDetails["msg"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("msg", $_SESSION["commMedium"]) ? TRUE : FALSE) ) echo 'checked'; ?> >
+                                                <?php
+                                                    if( (isset($empDetails["msg"]) && $empDetails["msg"]=="1") 
+                                                        || ( isset($_SESSION["commMedium"]) && in_array("msg", $_SESSION["commMedium"]) ? TRUE : FALSE) ) {
+                                                            echo 'checked';
+                                                    } 
+                                                ?>
+                                                >
                                                 <label for="message">Message</label>
                                             </div>
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="phone" name="commMed[]" value="phone"
-                                                    <?php if( (isset($empDetails["call"]) && 
-                                                    $empDetails["call"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("phone", $_SESSION["commMedium"]) ? TRUE : FALSE) )echo 'checked'; ?> >
+                                                <?php
+                                                    if( (isset($empDetails["call"]) && $empDetails["call"]=="1") 
+                                                        || ( isset($_SESSION["commMedium"]) && in_array("phone", $_SESSION["commMedium"]) ? TRUE : FALSE) ){
+
+                                                        echo 'checked';
+                                                    } 
+                                                ?>
+                                                >
                                                 <label for="phone">Phone</label>
                                             </div>
                                             <div class="checkbox-inline">
                                                 <input type="checkbox" id="any" name="commMed[]" value="any" 
-                                                    <?php if( (isset($empDetails["any"]) && 
-                                                    $empDetails["any"]=="1") || ( isset($_SESSION["commMedium"]) && in_array("any", $_SESSION["commMedium"]) ? TRUE : FALSE) ) echo 'checked'; ?> >
+                                                <?php 
+                                                    if( (isset($empDetails["any"]) && $empDetails["any"]=="1") 
+                                                        || ( isset($_SESSION["commMedium"]) && in_array("any", $_SESSION["commMedium"]) ? TRUE : FALSE) ) {
+
+                                                        echo 'checked';
+                                                    }
+                                                ?>
+                                                >
                                                 <label for="any">Any</label>
                                             </div>
                                         </div>
@@ -780,10 +1044,25 @@
                 </div>
                 <div class="row text-center">
                     <input type="submit" name="submit" value=
-                        <?php if( (isset($_GET['userAction']) && $_GET['userAction']=='update') || ( isset($_SESSION["retainUpdateBtn"]) 
-                        && $_SESSION["retainUpdateBtn"] == 1)  ) {echo 'UPDATE'; } else {echo 'SUBMIT';} ?> class="btn btn-primary"> &nbsp;  &nbsp;  &nbsp;
-                    <input type= <?php if( (isset($_GET['userAction']) && $_GET['userAction']=='update') || 
-                    ( isset($_SESSION["retainUpdateBtn"]) && $_SESSION["retainUpdateBtn"] == 1) ) {echo 'hidden'; } else {echo 'reset';} ?> name="Reset" class="btn btn-danger">
+                    <?php 
+                        if( (isset($_GET['userAction']) && $_GET['userAction'] == 'update') || ( isset($_SESSION["retainUpdateBtn"]) 
+                            && $_SESSION["retainUpdateBtn"] == 1)  ) {
+
+                            echo 'UPDATE'; 
+                        } else {
+                            echo 'SUBMIT';
+                        }
+                        ?>
+                        class="btn btn-primary"> &nbsp;  &nbsp;  &nbsp;
+                    <input type= 
+                    <?php 
+                        if( (isset($_GET['userAction']) && $_GET['userAction'] == 'update') || 
+                            ( isset($_SESSION["retainUpdateBtn"]) && $_SESSION["retainUpdateBtn"] == 1) ) {
+                            
+                            echo 'hidden'; } else {echo 'reset';
+                        }
+                        ?>
+                        name="Reset" class="btn btn-danger">
                 </div>
         </form>
         </div>
